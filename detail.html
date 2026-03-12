@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="View details, watch trailers, rate and discuss your favourite movies, shows and anime on FlixRate."
+    />
+    <title>Loading… – FlixRate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/detail.css" />
+  </head>
+  <body>
+    <!-- ══════════════════ NAVBAR ══════════════════ -->
+    <nav class="navbar" id="navbar">
+      <a href="index.html" class="nav-logo"
+        ><span>FLIX</span><span>RATE</span></a
+      >
+
+      <div class="nav-search">
+        <form id="search-form" role="search">
+          <span class="search-icon">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+          </span>
+          <input
+            type="search"
+            id="search-input"
+            placeholder="Search…"
+            autocomplete="off"
+          />
+        </form>
+        <div id="search-results"></div>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="browse.html?type=movie">Movies</a></li>
+        <li><a href="browse.html?type=anime">Anime</a></li>
+        <li><a href="browse.html?type=tv">TV Series</a></li>
+        <li><a href="forum.html" style="color:var(--accent-light)">Forum</a></li>
+      </ul>
+
+      <div id="nav-user-area"></div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+
+    <!-- ══════════════════ LOADING ══════════════════ -->
+    <div
+      id="detail-loading"
+      style="
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+      "
+    >
+      <div
+        style="
+          width: 52px;
+          height: 52px;
+          border: 3px solid rgba(124, 58, 237, 0.2);
+          border-top-color: var(--accent);
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        "
+      ></div>
+      <p style="color: var(--text-muted); font-size: 0.9rem">
+        Loading details…
+      </p>
+    </div>
+
+    <!-- ══════════════════ ERROR ══════════════════ -->
+    <div
+      id="detail-error"
+      style="
+        display: none;
+        min-height: 100vh;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px;
+      "
+    >
+      <div>
+        <div style="font-size: 3.5rem; margin-bottom: 16px">😵</div>
+        <h1 style="font-size: 1.6rem; margin-bottom: 10px">
+          Content Not Found
+        </h1>
+        <p style="color: var(--text-muted); margin-bottom: 24px">
+          We couldn't load this title. It may have been removed or the ID is
+          invalid.
+        </p>
+        <a
+          href="index.html"
+          class="btn-trailer"
+          style="
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+          "
+          >← Back to Home</a
+        >
+      </div>
+    </div>
+
+    <!-- ══════════════════ MAIN PAGE ══════════════════ -->
+    <div id="detail-main" style="display: none">
+      <!-- ── HERO BANNER ──────────────────────────── -->
+      <section class="detail-hero">
+        <div class="detail-backdrop" id="detail-backdrop"></div>
+
+        <div class="detail-hero-content">
+          <!-- Poster -->
+          <div class="detail-poster-wrap">
+            <img
+              id="detail-poster"
+              src=""
+              alt="Poster"
+              width="200"
+              height="300"
+            />
+          </div>
+
+          <!-- Info -->
+          <div class="detail-info">
+            <div id="detail-badges" class="detail-badges"></div>
+            <h1 id="detail-title"></h1>
+            <p class="detail-tagline" id="detail-tagline"></p>
+            <div class="detail-meta-row" id="detail-meta-row"></div>
+
+            <div class="detail-actions">
+              <button class="btn-trailer" id="detail-trailer-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                  <polygon points="5,3 19,12 5,21" />
+                </svg>
+                Watch Trailer
+              </button>
+              <button class="btn-ghost" id="btn-wishlist">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Add to List</span>
+              </button>
+              <a
+                href="index.html"
+                class="btn-ghost"
+                style="text-decoration: none"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="15,18 9,12 15,6" />
+                </svg>
+                Back
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════
+         BODY — two columns: main | sidebar
+    ══════════════════════════════════════════ -->
+      <div class="detail-body">
+        <!-- ── LEFT MAIN COLUMN ──────────────────── -->
+        <div class="detail-main-col">
+          <!-- Synopsis -->
+          <section>
+            <h2 class="detail-section-title">Synopsis</h2>
+            <p class="detail-synopsis" id="detail-overview"></p>
+          </section>
+
+          <!-- Trailer embed -->
+          <section class="detail-trailer-embed">
+            <h2 class="detail-section-title">Official Trailer</h2>
+            <div id="trailer-embed-area"></div>
+          </section>
+
+          <!-- Similar Anime Recommendations -->
+          <section
+            class="similar-anime-section"
+            id="similar-anime-section"
+            style="display: none"
+          >
+            <h2 class="detail-section-title">Similar Anime Recommendations</h2>
+            <div class="similar-anime-container">
+              <button
+                class="similar-anime-nav similar-anime-prev"
+                aria-label="Scroll left"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="15,18 9,12 15,6" />
+                </svg>
+              </button>
+              <div class="similar-anime-track" id="similar-anime-track">
+                <!-- Cards injected by detail.js -->
+              </div>
+              <button
+                class="similar-anime-nav similar-anime-next"
+                aria-label="Scroll right"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="9,18 15,12 9,6" />
+                </svg>
+              </button>
+            </div>
+          </section>
+
+          <!-- Comments -->
+          <section class="comments-section">
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                gap: 12px;
+              "
+            >
+              <h2 class="detail-section-title" style="margin-bottom: 0">
+                Discussion
+                <span
+                  id="comments-count"
+                  style="
+                    font-size: 0.8rem;
+                    color: var(--text-muted);
+                    font-weight: 500;
+                    margin-left: 6px;
+                  "
+                ></span>
+              </h2>
+              <div class="comment-filters">
+                <span class="comment-filters-label">Sort:</span>
+                <button class="comment-filter-btn active" data-filter="newest">
+                  Newest
+                </button>
+                <button class="comment-filter-btn" data-filter="top">
+                  Most Helpful
+                </button>
+                <button class="comment-filter-btn" data-filter="rated">
+                  Highest Rated
+                </button>
+              </div>
+            </div>
+
+            <!-- Write a comment -->
+            <div class="comment-input-area">
+              <div class="comment-input-header" id="comment-input-header">
+                <!-- Populated by detail.js -->
+              </div>
+              <textarea
+                id="comment-textarea"
+                placeholder="Share your thoughts, reviews, or questions about this title…"
+                maxlength="500"
+              ></textarea>
+              <div class="comment-input-actions">
+                <span class="comment-char-count" id="comment-char-count"
+                  >0/500</span
+                >
+                <button class="comment-submit-btn" id="comment-submit-btn">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                  Post Comment
+                </button>
+              </div>
+            </div>
+
+            <!-- Comments list -->
+            <div id="comments-list"></div>
+            <button
+              class="comments-load-more"
+              id="comments-load-more"
+              style="display: none"
+            >
+              Show more comments
+            </button>
+          </section>
+        </div>
+        <!-- /main-col -->
+
+        <!-- ── RIGHT SIDEBAR ─────────────────────── -->
+        <aside class="detail-sidebar">
+          <!-- Rating box -->
+          <div class="rating-box">
+            <div class="rating-title">Community Rating</div>
+
+            <!-- Global score -->
+            <div class="global-score">
+              <div style="display: flex; align-items: baseline; gap: 4px">
+                <span class="global-score-number" id="global-score-number"
+                  >—</span
+                >
+                <span
+                  style="
+                    font-size: 1.1rem;
+                    color: var(--text-muted);
+                    font-weight: 700;
+                  "
+                  id="global-score-pct"
+                  >/5</span
+                >
+              </div>
+              <div class="global-stars" id="global-stars">☆☆☆☆☆</div>
+              <div class="global-vote-count" id="global-vote-count">
+                No votes yet
+              </div>
+            </div>
+
+            <!-- User vote -->
+            <div class="user-rating-label">Your Rating (click to rate)</div>
+            <div
+              class="star-picker"
+              id="star-picker"
+              role="group"
+              aria-label="Rate from 1 to 5"
+            >
+              <!-- 5 stars -->
+              <button class="star-pick-btn" data-star="1" aria-label="1 star">
+                ★
+              </button>
+              <button class="star-pick-btn" data-star="2" aria-label="2 stars">
+                ★
+              </button>
+              <button class="star-pick-btn" data-star="3" aria-label="3 stars">
+                ★
+              </button>
+              <button class="star-pick-btn" data-star="4" aria-label="4 stars">
+                ★
+              </button>
+              <button class="star-pick-btn" data-star="5" aria-label="5 stars">
+                ★
+              </button>
+            </div>
+
+            <button class="vote-submit-btn" id="vote-submit-btn">
+              Submit Rating
+            </button>
+            <div class="vote-thanks" id="vote-thanks"></div>
+
+            <!-- Distribution bars -->
+            <div class="rating-bars" id="rating-bars"></div>
+          </div>
+
+          <!-- Info card -->
+          <div class="detail-info-card">
+            <h3
+              style="
+                font-size: 0.78rem;
+                font-weight: 800;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: var(--text-muted);
+                margin-bottom: 8px;
+              "
+            >
+              Details
+            </h3>
+            <div id="detail-info-list">
+              <!-- Rows injected by detail.js -->
+            </div>
+          </div>
+        </aside>
+      </div>
+      <!-- /detail-body -->
+    </div>
+    <!-- /detail-main -->
+
+    <!-- ══════════════════ TRAILER MODAL ══════════════════ -->
+    <div
+      id="trailer-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Trailer"
+    >
+      <div class="modal-container">
+        <button id="trailer-modal-close" aria-label="Close">✕</button>
+        <iframe
+          id="trailer-iframe"
+          title="Trailer"
+          allowfullscreen
+          allow="
+            accelerometer;
+            autoplay;
+            clipboard-write;
+            encrypted-media;
+            gyroscope;
+            picture-in-picture;
+          "
+        ></iframe>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SCRIPTS ══════════════════ -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/colorExtractor.js"></script>
+    <script src="js/detail.js"></script>
+
+    <script>
+      // Navbar scroll effect
+      const navbar = document.getElementById("navbar");
+      window.addEventListener(
+        "scroll",
+        () => {
+          navbar.classList.toggle("navbar--solid", window.scrollY > 20);
+        },
+        { passive: true },
+      );
+
+      // Mobile nav toggle
+      document.getElementById("nav-toggle")?.addEventListener("click", () => {
+        document
+          .querySelector(".nav-links")
+          ?.classList.toggle("nav-menu--open");
+      });
+    </script>
+  </body>
+</html>

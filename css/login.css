@@ -1,0 +1,248 @@
+/* ============================================================
+   FlixRate – Login / Register Page Styles
+   ============================================================ */
+
+/* ── Body override ───────────────────────────────────────── */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: 
+    radial-gradient(ellipse at 15% 30%, rgba(124,58,237,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 70%, rgba(168,85,247,0.15) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, rgba(20,20,40,0.9) 0%, rgba(10,10,15,1) 100%);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated BG particles */
+.login-page::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  top: -200px; left: -200px;
+  background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 60%);
+  animation: floatBg 8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.login-page::after {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  bottom: -100px; right: -100px;
+  background: radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 60%);
+  animation: floatBg 6s ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+}
+
+@keyframes floatBg {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(30px, 20px) scale(1.08); }
+}
+
+/* ── Logo ────────────────────────────────────────────────── */
+.login-logo {
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 1;
+}
+.login-logo a {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+}
+.login-logo a span:first-child { color: #5dfc8d; }
+.login-logo a span:last-child  { color: white; }
+
+/* ── Card ────────────────────────────────────────────────── */
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  background: rgba(22, 22, 34, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 30px 80px rgba(0,0,0,0.6),
+    0 0 80px rgba(124,58,237,0.12);
+  animation: slideUp 0.5s ease;
+}
+
+/* ── Tabs ────────────────────────────────────────────────── */
+.login-tabs {
+  display: flex;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 32px;
+  gap: 4px;
+}
+
+.login-tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  cursor: pointer;
+}
+.login-tab-btn.active {
+  background: rgba(124,58,237,0.85);
+  color: white;
+  box-shadow: 0 2px 12px rgba(124,58,237,0.4);
+}
+
+/* ── Forms ───────────────────────────────────────────────── */
+.login-form { display: flex; flex-direction: column; gap: 18px; }
+.login-form:not(.form--active) { display: none; }
+
+.form-group { display: flex; flex-direction: column; gap: 7px; }
+
+.form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.form-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.form-input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+.form-input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+.form-input:focus {
+  border-color: var(--accent);
+  background: rgba(124,58,237,0.08);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.18);
+}
+.form-input::placeholder { color: var(--text-muted); }
+
+/* Password toggle */
+.form-pw-toggle {
+  position: absolute;
+  right: 12px;
+  background: none; border: none;
+  color: var(--text-muted);
+  display: flex; align-items: center;
+  transition: color var(--transition-fast);
+}
+.form-pw-toggle:hover { color: var(--text-primary); }
+
+/* Error messages */
+.form-error {
+  font-size: 0.78rem;
+  color: var(--red);
+  display: none;
+  margin-top: 4px;
+}
+.form-error.visible { display: block; animation: fadeIn 0.2s ease; }
+
+/* Alert box */
+.form-alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  display: none;
+}
+.form-alert.form-alert--error {
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5;
+  display: block;
+}
+.form-alert.form-alert--success {
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3);
+  color: #86efac;
+  display: block;
+}
+
+/* ── Submit button ───────────────────────────────────────── */
+.form-submit {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+  margin-top: 4px;
+}
+.form-submit:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 28px rgba(124,58,237,0.55);
+}
+.form-submit:active { transform: scale(0.98); }
+.form-submit:disabled { opacity: 0.55; pointer-events: none; }
+
+/* ── Divider ─────────────────────────────────────────────── */
+.form-divider {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  position: relative;
+  margin: 4px 0;
+}
+.form-divider::before, .form-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 36%;
+  height: 1px;
+  background: var(--border);
+}
+.form-divider::before { left: 0; }
+.form-divider::after  { right: 0; }
+
+/* ── Back to home link ───────────────────────────────────── */
+.login-back {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.login-back a {
+  color: var(--accent-light);
+  font-weight: 600;
+  transition: color var(--transition-fast);
+}
+.login-back a:hover { color: white; }

@@ -1,0 +1,346 @@
+/* ============================================================
+   FlixRate – Hero Section Styles
+   ============================================================ */
+
+/* ── Container ───────────────────────────────────────────── */
+#hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 620px;
+  max-height: 860px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: #0a0a0f;
+  transition: opacity 0.35s ease;
+
+  /* CSS vars for dynamic glow from color extractor */
+  --hero-color-r: 120;
+  --hero-color-g: 40;
+  --hero-color-b: 200;
+}
+
+/* Fade transition state */
+#hero.hero--transitioning { opacity: 0; pointer-events: none; }
+
+/* Loading skeleton */
+#hero.hero--loading #hero-backdrop {
+  background: linear-gradient(135deg,
+    rgba(30,30,45,0.9) 0%,
+    rgba(20,20,30,0.8) 100%);
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* ── Backdrop ────────────────────────────────────────────── */
+#hero-backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  transition: background-image 0.01s;
+  transform: scale(1.04);
+  animation: heroZoom 7s ease-in-out infinite alternate;
+}
+
+@keyframes heroZoom {
+  from { transform: scale(1.04); }
+  to   { transform: scale(1.00); }
+}
+
+/* Gradient overlays */
+#hero-backdrop::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    115deg,
+    rgba(10,10,15,0.96) 0%,
+    rgba(10,10,15,0.75) 35%,
+    rgba(10,10,15,0.15) 60%,
+    rgba(10,10,15,0.05) 100%
+  );
+}
+#hero-backdrop::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10,10,15,1.0) 0%,
+    rgba(10,10,15,0.7) 25%,
+    rgba(10,10,15,0.0) 60%
+  );
+}
+
+/* Dynamic color glow from the bottom */
+.hero-color-glow {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 40%;
+  background: radial-gradient(
+    ellipse at 30% 100%,
+    rgba(var(--hero-color-r), var(--hero-color-g), var(--hero-color-b), 0.18) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.8s ease;
+}
+
+/* ── Content Layout ──────────────────────────────────────── */
+.hero-content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 36px;
+  padding: 0 52px 72px;
+}
+
+/* ── Poster Card ─────────────────────────────────────────── */
+.hero-poster-wrap {
+  flex-shrink: 0;
+  width: 180px;
+  transform: translateY(10px);
+  animation: slideUp 0.6s ease forwards;
+}
+.hero-poster-shadow {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,0.08),
+    0 20px 60px rgba(0,0,0,0.8),
+    0 0 40px rgba(var(--hero-color-r), var(--hero-color-g), var(--hero-color-b), 0.25);
+  transition: box-shadow 0.8s ease;
+}
+#hero-poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Text Block ──────────────────────────────────────────── */
+.hero-text {
+  flex: 1;
+  min-width: 0;
+  animation: slideUp 0.65s 0.08s ease both;
+}
+
+/* Type badge (ANIME / MOVIE / TV) */
+.hero-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 50px;
+  margin-bottom: 12px;
+}
+.hero-type-badge--anime  { background: rgba(255, 80, 80, 0.18); color: #ff7b7b; border: 1px solid rgba(255,80,80,0.3); }
+.hero-type-badge--movie  { background: rgba(80, 140, 255, 0.18); color: #7bb3ff; border: 1px solid rgba(80,140,255,0.3); }
+.hero-type-badge--tv     { background: rgba(80, 220, 140, 0.18); color: #7bffb3; border: 1px solid rgba(80,220,140,0.3); }
+
+/* Title */
+#hero-title {
+  font-family: 'Bebas Neue', 'Outfit', sans-serif;
+  font-size: clamp(2.6rem, 5.5vw, 4.8rem);
+  font-weight: 400; /* Bebas Neue is always bold */
+  color: white;
+  line-height: 1.0;
+  letter-spacing: 1.5px;
+  text-shadow:
+    0 2px 12px rgba(0,0,0,0.8),
+    0 0 80px rgba(var(--hero-color-r), var(--hero-color-g), var(--hero-color-b), 0.35);
+  margin-bottom: 12px;
+  transition: text-shadow 0.8s ease;
+}
+
+/* Rating row */
+#hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+.hero-vote-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.hero-year { 
+  font-weight: 600; 
+  color: var(--text-secondary); 
+  font-size: 0.78rem;
+}
+.hero-rating { 
+  font-size: 0.82rem; 
+  font-weight: 700; 
+  color: var(--gold); 
+}
+
+/* Stars */
+.hero-stars { font-size: 1rem; letter-spacing: 2px; }
+.star-full  { color: var(--gold); }
+.star-half  { color: var(--gold); opacity: 0.7; }
+.star-empty { color: var(--text-muted); opacity: 0.5; }
+
+/* Overview */
+#hero-overview {
+  font-size: 0.88rem;
+  color: rgba(220,220,240,0.72);
+  line-height: 1.65;
+  max-width: 480px;
+  margin-bottom: 28px;
+  font-weight: 300;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.hero-buttons {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Watch Trailer – dynamic color button */
+#hero-trailer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 28px;
+  border-radius: 50px;
+  border: 2px solid rgba(255,255,255,0.2);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  box-shadow: 0 0 20px rgba(124,58,237,0.55), 0 4px 15px rgba(124,58,237,0.35);
+  letter-spacing: 0.3px;
+  transition:
+    background 0.5s ease,
+    box-shadow 0.5s ease,
+    border-color 0.5s ease,
+    transform 0.18s ease,
+    opacity 0.18s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+#hero-trailer-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.18s ease;
+}
+#hero-trailer-btn:hover::before { background: rgba(255,255,255,0.12); }
+#hero-trailer-btn:hover { transform: translateY(-2px) scale(1.01); }
+#hero-trailer-btn:active { transform: scale(0.98); }
+#hero-trailer-btn:disabled { opacity: 0.7; pointer-events: none; }
+
+/* Play icon inside button */
+.btn-play-icon {
+  width: 24px; height: 24px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Add to List button */
+#hero-list-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 50px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(8px);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+#hero-list-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.35);
+  transform: translateY(-2px);
+  color: white;
+}
+
+/* ── Controls (prev/next + dots) ─────────────────────────── */
+.hero-controls {
+  position: absolute;
+  bottom: 24px;
+  right: 52px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hero-nav-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(10,10,15,0.55);
+  backdrop-filter: blur(8px);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+.hero-nav-btn:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.35);
+  transform: scale(1.1);
+}
+
+#hero-dots { display: flex; gap: 8px; align-items: center; }
+.hero-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast), width var(--transition-med);
+}
+.hero-dot--active {
+  background: white;
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* ── Shimmer skeleton ────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-content { flex-direction: column; align-items: flex-start; padding: 0 24px 100px; gap: 20px; }
+  .hero-poster-wrap { width: 130px; }
+  #hero-title { font-size: clamp(2rem, 8vw, 3.2rem); }
+  #hero-overview { max-width: 100%; }
+  .hero-controls { right: 24px; }
+}
+
+@media (max-width: 600px) {
+  .hero-poster-wrap { width: 100px; }
+  .hero-content { padding: 0 16px 110px; }
+  .hero-controls { right: 16px; bottom: 16px; }
+  #hero-trailer-btn { padding: 11px 22px; font-size: 0.85rem; }
+  #hero-list-btn { padding: 11px 18px; font-size: 0.82rem; }
+}

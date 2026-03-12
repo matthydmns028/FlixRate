@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse movies, anime and TV shows by genre on FlixRate.">
+  <title>Browse by Genre – FlixRate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/browse.css">
+</head>
+<body>
+
+<!-- ══════════════════ NAVBAR ══════════════════ -->
+<nav class="navbar navbar--solid" id="navbar">
+  <a href="index.html" class="nav-logo"><span>FLIX</span><span>RATE</span></a>
+  <div class="nav-search" style="flex:1;max-width:360px">
+    <form id="search-form" role="search" onsubmit="return false">
+      <span class="search-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <input type="search" id="search-input" placeholder="Search FlixRate…" autocomplete="off">
+    </form>
+    <div id="search-results"></div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="browse.html?type=movie" style="color:var(--accent-light)">Movies</a></li>
+    <li><a href="browse.html?type=anime">Anime</a></li>
+    <li><a href="browse.html?type=tv">TV Series</a></li>
+    <li><a href="music.html">Music</a></li>`n      <li><a href="forum.html">Forum</a></li>
+    <li><a href="watchlist.html">🔖 Watchlist</a></li>
+  </ul>
+  <div id="nav-user-area"></div>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<main class="browse-page">
+
+  <!-- Hero -->
+  <div class="browse-hero">
+    <div class="browse-hero-eyebrow">🎬 Discover</div>
+    <h1 class="browse-hero-title">Browse <span id="browse-type-label">Movies</span></h1>
+    <p class="browse-hero-sub">Pick a genre and explore the best content FlixRate has to offer.</p>
+  </div>
+
+  <!-- Type tabs -->
+  <div class="browse-type-tabs">
+    <button class="browse-type-tab active" data-type="movie">
+      <span>🎬</span><span>Movies</span>
+    </button>
+    <button class="browse-type-tab" data-type="tv">
+      <span>📺</span><span>TV Shows</span>
+    </button>
+    <button class="browse-type-tab" data-type="anime">
+      <span>🎌</span><span>Anime</span>
+    </button>
+    <button class="browse-type-tab" data-type="manga">
+      <span>📖</span><span>Manga</span>
+    </button>
+  </div>
+
+  <!-- Genre grid -->
+  <div class="browse-section-title">🏷️ Genres</div>
+  <div class="genre-grid" id="genre-grid"></div>
+
+  <!-- Results bar -->
+  <div class="results-bar">
+    <div class="results-bar-label">
+      <span id="results-bar-label">All</span>
+      <span class="results-count" id="results-count"></span>
+    </div>
+    <div class="results-bar-sort">
+      <button class="sort-btn active" data-sort="popular">🔥 Popular</button>
+      <button class="sort-btn" data-sort="rating">⭐ Top Rated</button>
+      <button class="sort-btn" data-sort="newest">🆕 Newest</button>
+    </div>
+  </div>
+
+  <!-- Results grid -->
+  <div class="browse-results-grid" id="browse-results-grid"></div>
+
+  <!-- Load more -->
+  <div class="browse-load-more" id="browse-load-more-wrap" style="display:none">
+    <button class="btn-load-more" id="btn-load-more">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+      Load More
+    </button>
+  </div>
+
+</main>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/contextmenu.js"></script>
+<script src="js/browse.js"></script>
+<script>
+  document.getElementById('nav-toggle')?.addEventListener('click', () => {
+    document.querySelector('.nav-links')?.classList.toggle('nav-menu--open');
+  });
+</script>
+</body>
+</html>

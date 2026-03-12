@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Your FlixRate profile — manage your avatar, highlights, ratings and activity.">
+  <title>My Profile – FlixRate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+
+<!-- ══════════════════ NAVBAR ══════════════════ -->
+<nav class="navbar navbar--solid" id="navbar">
+  <a href="index.html" class="nav-logo"><span>FLIX</span><span>RATE</span></a>
+  <div class="nav-search" style="flex:1;max-width:360px">
+    <form id="search-form" role="search" onsubmit="return false">
+      <span class="search-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <input type="search" id="search-input" placeholder="Search FlixRate…" autocomplete="off">
+    </form>
+    <div id="search-results"></div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="browse.html?type=movie">Movies</a></li>
+    <li><a href="browse.html?type=anime">Anime</a></li>
+    <li><a href="browse.html?type=tv">TV Series</a></li>
+    <li><a href="music.html">Music</a></li>`n      <li><a href="forum.html">Forum</a></li>
+  </ul>
+  <div id="nav-user-area"></div>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- ══════════════════ MAIN PROFILE ══════════════════ -->
+<div id="profile-main">
+<div class="profile-page">
+
+  <!-- ── PROFILE HEADER ─────────────────────────────────── -->
+  <div class="profile-header">
+    <!-- Banner -->
+    <div class="profile-banner">
+      <button class="profile-banner-edit" onclick="Profile.init && document.getElementById('btn-edit-profile').click()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Profile
+      </button>
+    </div>
+
+    <div class="profile-header-body">
+      <!-- Avatar + name row -->
+      <div class="profile-avatar-wrap">
+        <!-- Avatar (clickable to upload) -->
+        <div class="profile-avatar-container" id="profile-avatar-container" title="Change profile picture">
+          <div class="profile-avatar-img" id="profile-avatar-display">?</div>
+          <div class="avatar-edit-overlay">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>CHANGE</span>
+          </div>
+        </div>
+        <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
+
+        <!-- Name + badge -->
+        <div class="profile-name-section">
+          <div class="profile-display-name">
+            <span id="profile-display-name">—</span>
+            <span class="profile-badge badge-member" id="profile-badge">Member</span>
+          </div>
+          <div class="profile-username" id="profile-username">@—</div>
+          <div class="profile-bio" id="profile-bio"></div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="profile-header-actions">
+          <button class="btn-edit-profile" id="btn-edit-profile">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Profile
+          </button>
+          <button class="btn-friends" id="btn-friends" title="Friends">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Friends
+            <span class="friends-badge" id="friends-badge" style="display:none">0</span>
+          </button>
+          <button class="btn-share-profile" id="btn-share-profile">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="profile-stats">
+        <div class="stat-item">
+          <div class="stat-num" id="stat-ratings">0</div>
+          <div class="stat-label">Ratings</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="stat-wishlist">0</div>
+          <div class="stat-label">Watchlist</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="stat-posts">0</div>
+          <div class="stat-label">Forum Posts</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Highlights</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BODY ─────────────────────────────────────────────── -->
+  <div class="profile-body">
+
+    <!-- ── LEFT COLUMN ───────────────────────────────────── -->
+    <div>
+
+      <!-- Highlights -->
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <div class="profile-card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            My Top 5 Highlights
+          </div>
+          <button class="profile-card-action" onclick="Profile.openPicker(document.querySelector('.highlight-slot.empty')?.onclick?.toString().match(/\d+/)?.[0]??0)">
+            Edit
+          </button>
+        </div>
+        <div class="highlights-grid" id="highlights-grid">
+          <!-- Populated by profile.js -->
+        </div>
+      </div>
+
+      <!-- Tabs: Activity / Ratings -->
+      <div class="profile-card" style="padding-bottom:28px">
+        <div class="profile-tabs">
+          <button class="profile-tab active" data-tab="activity">📋 Recent Activity</button>
+          <button class="profile-tab" data-tab="rated">⭐ My Ratings</button>
+        </div>
+
+        <!-- Activity panel -->
+        <div class="tab-panel" id="panel-activity">
+          <div class="activity-list" id="activity-list"></div>
+        </div>
+
+        <!-- Rated panel -->
+        <div class="tab-panel" id="panel-rated" style="display:none">
+          <div id="tab-rated-grid"></div>
+        </div>
+      </div>
+
+    </div>
+    <!-- /left column -->
+
+    <!-- ── RIGHT SIDEBAR ─────────────────────────────────── -->
+    <aside class="profile-sidebar">
+
+      <!-- Favourite genres -->
+      <div class="profile-mini-card">
+        <div class="mini-card-title">⚡ Favourite Genres</div>
+        <div class="genre-tags" id="genre-tags"></div>
+      </div>
+
+      <!-- Watchlist mini -->
+      <div class="profile-mini-card">
+        <div class="mini-card-title">🔖 Watchlist</div>
+        <div id="watchlist-mini-list"></div>
+        <a href="watchlist.html" style="display:block;margin-top:10px;font-size:0.8rem;color:var(--accent-light);font-weight:600;text-decoration:none;text-align:center">
+          View Full Watchlist →
+        </a>
+      </div>
+
+      <!-- Forum activity -->
+      <div class="profile-mini-card">
+        <div class="mini-card-title">💬 Forum Activity</div>
+        <div id="forum-mini" style="font-size:0.82rem;color:var(--text-muted)">
+          See your posts on the <a href="forum.html" style="color:var(--accent-light);font-weight:600">Forum page</a>.
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+  <!-- /profile-body -->
+
+</div>
+</div>
+<!-- /#profile-main -->
+
+<!-- ══════════════════ EDIT PROFILE SETTINGS PANEL ══════════════════ -->
+<div class="settings-backdrop" id="settings-backdrop"></div>
+<aside class="settings-panel" id="settings-panel" aria-label="Edit profile">
+  <div class="settings-head">
+    <h2 class="settings-title">✏️ Edit Profile</h2>
+    <button class="settings-close" id="settings-close" aria-label="Close">✕</button>
+  </div>
+  <div class="settings-body">
+
+    <!-- Avatar -->
+    <div class="settings-section">
+      <div class="settings-section-label">Profile Picture</div>
+      <div class="settings-avatar-row">
+        <div class="settings-avatar-preview" id="settings-avatar-preview">?</div>
+        <div class="settings-avatar-btns">
+          <button class="btn-upload-avatar" id="btn-upload-avatar">📷 Upload Photo</button>
+          <button class="btn-remove-avatar" id="btn-remove-avatar">Remove Photo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Display name -->
+    <div class="settings-section">
+      <div class="settings-section-label">Account Info</div>
+      <div class="settings-field">
+        <label class="settings-label" for="settings-display-name">Display Name</label>
+        <input type="text" class="settings-input" id="settings-display-name"
+               placeholder="How should we call you?" maxlength="32">
+      </div>
+      <div class="settings-field">
+        <label class="settings-label" for="settings-bio">Bio</label>
+        <textarea class="settings-textarea" id="settings-bio"
+                  placeholder="Tell the community about yourself… favourite genres, go-to comfort shows, unpopular opinions 👀"
+                  maxlength="200"></textarea>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="settings-section">
+      <div class="settings-section-label">Account</div>
+      <button style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.07);color:#f87171;font-size:0.85rem;font-weight:600;cursor:pointer;transition:background 0.15s"
+              onmouseover="this.style.background='rgba(239,68,68,0.14)'" onmouseout="this.style.background='rgba(239,68,68,0.07)'"
+              onclick="if(confirm('Sign out?')){Auth.logout();window.location.href='index.html';}">
+        🚪 Sign Out
+      </button>
+    </div>
+
+  </div>
+  <div class="settings-footer">
+    <button class="btn-cancel-settings" id="btn-cancel-settings">Cancel</button>
+    <button class="btn-save-settings" id="btn-save-settings">Save Changes</button>
+  </div>
+</aside>
+
+<!-- ══════════════════ PICKER MODAL ══════════════════ -->
+<div class="picker-modal-backdrop" id="picker-modal-backdrop">
+  <div class="picker-modal">
+    <div class="picker-head">
+      <h3>🌟 Choose a Highlight</h3>
+      <button class="picker-close" id="picker-close" aria-label="Close">✕</button>
+    </div>
+    <div class="picker-search-wrap">
+      <span class="picker-search-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <input type="search" class="picker-search-input" id="picker-search-input"
+             placeholder="Search for a movie, anime or TV show…" autocomplete="off">
+    </div>
+    <div class="picker-type-row">
+      <button class="picker-type-btn active" data-type="movie">🎬 Movies</button>
+      <button class="picker-type-btn" data-type="tv">📺 TV Series</button>
+      <button class="picker-type-btn" data-type="anime">🎌 Anime</button>
+    </div>
+    <div class="picker-results" id="picker-results">
+      <div class="picker-loading">
+        <div class="picker-spinner"></div>
+        Loading trending…
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ TOAST ══════════════════ -->
+<div id="profile-toast"></div>
+
+<!-- ══════════════════ FRIENDS DRAWER ══════════════════ -->
+<div class="friends-backdrop" id="friends-backdrop"></div>
+<aside class="friends-drawer" id="friends-drawer" aria-label="Friends">
+
+  <!-- Header -->
+  <div class="friends-head">
+    <h2 class="friends-head-title">👥 Friends</h2>
+    <button class="friends-head-close" id="friends-head-close" aria-label="Close">✕</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="friends-tabs">
+    <button class="friends-tab active" data-ftab="friends">My Friends</button>
+    <button class="friends-tab" data-ftab="requests">
+      Requests
+      <span class="friends-tab-badge" id="friends-tab-req-badge" style="display:none">0</span>
+    </button>
+    <button class="friends-tab" data-ftab="find">🔍 Find</button>
+  </div>
+
+  <!-- Search (only shown on Find tab) -->
+  <div class="friends-search-wrap" id="friends-search-wrap" style="display:none">
+    <input type="search" class="friends-search-input" id="friends-search-input"
+           placeholder="Search by username…" autocomplete="off">
+  </div>
+
+  <!-- Body -->
+  <div class="friends-body" id="friends-drawer-body"></div>
+
+</aside>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/profile.js"></script>
+<script>
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('navbar--solid', window.scrollY > 20);
+  }, { passive: true });
+  document.getElementById('nav-toggle')?.addEventListener('click', () => {
+    document.querySelector('.nav-links')?.classList.toggle('nav-menu--open');
+  });
+</script>
+</body>
+</html>

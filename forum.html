@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FlixRate Forum — discuss movies, anime, TV and more with the community.">
+  <title>Forum – FlixRate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/forum.css">
+</head>
+<body>
+
+<!-- ══════════════════ NAVBAR ══════════════════ -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="nav-logo"><span>FLIX</span><span>RATE</span></a>
+  <div class="nav-search">
+    <form id="search-form" role="search" onsubmit="return false">
+      <span class="search-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <input type="search" id="search-input" placeholder="Search FlixRate…" autocomplete="off">
+    </form>
+    <div id="search-results"></div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="browse.html?type=movie">Movies</a></li>
+    <li><a href="browse.html?type=anime">Anime</a></li>
+    <li><a href="browse.html?type=tv">TV Series</a></li>
+    <li><a href="music.html">Music</a></li>
+    <li><a href="forum.html" style="color:var(--accent-light)">Forum</a></li>
+    <li><a href="watchlist.html">🔖 Watchlist</a></li>
+  </ul>
+  <div id="nav-user-area"></div>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- ══════════════════ FORUM HERO ══════════════════ -->
+<div class="forum-hero">
+  <h1 class="forum-hero-title">🎬 FlixRate Community</h1>
+  <p class="forum-hero-sub">Discuss, review and debate everything you love about films & anime</p>
+  <div class="forum-search-bar">
+    <input type="search" id="forum-search-input" placeholder="Search discussions…" autocomplete="off">
+    <button id="forum-search-btn" aria-label="Search forum">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════ FORUM LAYOUT ══════════════════ -->
+<div class="forum-layout">
+
+  <!-- ── LEFT SIDEBAR ─────────────────────────────── -->
+  <aside class="forum-sidebar-left">
+    <button class="btn-new-post" id="btn-new-post">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Post
+    </button>
+    <div class="forum-sidebar-title">Categories</div>
+    <ul class="category-list" id="category-list"></ul>
+  </aside>
+
+  <!-- ── MAIN FEED ─────────────────────────────────── -->
+  <main class="forum-feed">
+    <div class="feed-header">
+      <h2 class="feed-title">Community Feed</h2>
+      <div class="sort-tabs">
+        <button class="sort-tab active" data-sort="newest">🕐 Latest</button>
+        <button class="sort-tab" data-sort="popular">🔥 Popular</button>
+        <button class="sort-tab" data-sort="discussed">💬 Most Discussed</button>
+      </div>
+    </div>
+    <div id="post-feed"></div>
+  </main>
+
+  <!-- ── RIGHT SIDEBAR ─────────────────────────────── -->
+  <aside class="forum-sidebar-right">
+    <div class="forum-widget">
+      <div class="widget-title">🔥 Trending Topics</div>
+      <div id="trending-topics"></div>
+    </div>
+    <div class="forum-widget">
+      <div class="widget-title">👥 Active Members</div>
+      <div id="online-users"></div>
+    </div>
+    <div class="forum-widget" style="text-align:center;">
+      <div class="widget-title">💡 Get Started</div>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:14px;line-height:1.5">
+        Sign in to post, like, and join discussions about your favourite content.
+      </p>
+      <a href="login.html" style="display:inline-block;padding:10px 22px;border-radius:50px;background:linear-gradient(135deg,var(--accent),var(--accent-light));color:white;font-size:0.85rem;font-weight:700;text-decoration:none;transition:opacity 0.18s"
+         onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        Sign In
+      </a>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ══════════════════ CREATE POST MODAL ══════════════════ -->
+<div class="modal-backdrop" id="create-post-modal">
+  <div class="create-post-modal">
+    <div class="modal-head">
+      <h2 class="modal-title">✏️ Create Post</h2>
+      <button class="modal-close" id="modal-close-btn" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- User row -->
+      <div class="modal-user-row" id="modal-user-row"></div>
+
+      <!-- Title -->
+      <input type="text" class="post-title-input" id="post-title-input"
+             placeholder="Give your post a title (optional)" maxlength="120">
+
+      <!-- Text body -->
+      <textarea class="post-textarea" id="post-textarea"
+                placeholder="What's on your mind? Share a review, hot take, or spark a debate…"
+                maxlength="2000"></textarea>
+
+      <!-- Category -->
+      <div class="forum-sidebar-title" style="margin:14px 0 10px;">Choose Category</div>
+      <div class="post-category-row">
+        <button class="cat-select-btn" data-cat="movies">🎬 Movies</button>
+        <button class="cat-select-btn" data-cat="anime">🎌 Anime</button>
+        <button class="cat-select-btn" data-cat="tv">📺 TV Series</button>
+        <button class="cat-select-btn" data-cat="gaming">🎮 Gaming</button>
+        <button class="cat-select-btn" data-cat="music">🎵 Music</button>
+        <button class="cat-select-btn selected" data-cat="general">💬 General</button>
+      </div>
+
+      <!-- Tags -->
+      <div class="forum-sidebar-title" style="margin:14px 0 8px;">Tags <span style="font-weight:400;font-size:0.75rem;letter-spacing:0;text-transform:none;">(press Enter or comma to add, max 5)</span></div>
+      <div class="tags-input-wrap" id="tags-input-wrap">
+        <input type="text" id="tag-input" placeholder="#anime #review #recommendations…" maxlength="30">
+      </div>
+
+      <!-- Image upload -->
+      <div class="forum-sidebar-title" style="margin:0 0 8px;">Attach Image <span style="font-weight:400;font-size:0.75rem;letter-spacing:0;text-transform:none;">(optional, max 5MB)</span></div>
+      <div class="image-upload-area" id="image-upload-area">
+        <input type="file" id="image-file-input" accept="image/*">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-label">Drag & drop or <span>click to upload</span></div>
+        <img id="image-preview" alt="Preview">
+        <button id="remove-image-btn" aria-label="Remove image">✕</button>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <span class="post-char-count" id="post-char-count">0/2000</span>
+        <button class="post-submit-btn" id="post-submit-btn">
+          Share Post 🚀
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ LIGHTBOX ══════════════════ -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close" aria-label="Close image">✕</button>
+  <img id="lightbox-img" alt="Full size image">
+</div>
+
+<!-- ══════════════════ TOAST ══════════════════ -->
+<div id="forum-toast" style="
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(10px);
+  background:rgba(30,30,46,0.95); backdrop-filter:blur(12px);
+  border:1px solid rgba(124,58,237,0.3); border-radius:50px;
+  padding:11px 24px; color:white; font-size:0.88rem; font-weight:600;
+  z-index:9999; opacity:0; transition:opacity 0.3s, transform 0.3s;
+  pointer-events:none; white-space:nowrap;
+"></div>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/forum.js"></script>
+<script>
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('navbar--solid', window.scrollY > 20);
+  }, { passive: true });
+  // Mobile toggle
+  document.getElementById('nav-toggle')?.addEventListener('click', () => {
+    document.querySelector('.nav-links')?.classList.toggle('nav-menu--open');
+  });
+</script>
+</body>
+</html>

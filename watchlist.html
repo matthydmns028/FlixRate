@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Your saved watchlist on FlixRate.">
+  <title>My Watchlist – FlixRate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/watchlist.css">
+</head>
+<body>
+
+<!-- ══════════════════ NAVBAR ══════════════════ -->
+<nav class="navbar navbar--solid" id="navbar">
+  <a href="index.html" class="nav-logo"><span>FLIX</span><span>RATE</span></a>
+  <div class="nav-search" style="flex:1;max-width:360px">
+    <form id="search-form" role="search" onsubmit="event.preventDefault();const q=document.getElementById('search-input').value.trim();if(q)window.location.href='search.html?q='+encodeURIComponent(q)">
+      <span class="search-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <input type="search" id="search-input" placeholder="Search FlixRate…" autocomplete="off">
+    </form>
+    <div id="search-results"></div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="browse.html?type=movie">Movies</a></li>
+    <li><a href="browse.html?type=anime">Anime</a></li>
+    <li><a href="browse.html?type=tv">TV Series</a></li>
+    <li><a href="music.html">Music</a></li>`n      <li><a href="forum.html">Forum</a></li>
+    <li><a href="watchlist.html" style="color:var(--accent-light)">🔖 Watchlist</a></li>
+  </ul>
+  <div id="nav-user-area"></div>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<main class="watchlist-page">
+
+  <!-- Hero -->
+  <div class="watchlist-hero">
+    <div class="watchlist-hero-left">
+      <h1>My <span>Watchlist</span></h1>
+      <p class="watchlist-hero-sub">All the titles you've saved to watch later.</p>
+      <span class="watchlist-count-badge" id="wl-count">0 saved</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="watchlist-controls">
+    <button class="wl-filter-btn active" data-filter="all">All <span class="wl-filter-count">0</span></button>
+    <button class="wl-filter-btn" data-filter="movie">🎬 Movies <span class="wl-filter-count">0</span></button>
+    <button class="wl-filter-btn" data-filter="tv">📺 TV Shows <span class="wl-filter-count">0</span></button>
+    <button class="wl-filter-btn" data-filter="anime">🎌 Anime <span class="wl-filter-count">0</span></button>
+    <select class="wl-sort-select" id="wl-sort">
+      <option value="newest">⬇ Recently Added</option>
+      <option value="oldest">⬆ Oldest First</option>
+      <option value="rating">⭐ Highest Rated</option>
+      <option value="title">🔤 A-Z Title</option>
+    </select>
+  </div>
+
+  <!-- Grid -->
+  <div class="watchlist-grid" id="watchlist-grid"></div>
+
+</main>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/watchlist.js"></script>
+<script>
+  document.getElementById('nav-toggle')?.addEventListener('click', () => {
+    document.querySelector('.nav-links')?.classList.toggle('nav-menu--open');
+  });
+</script>
+</body>
+</html>

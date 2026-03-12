@@ -1,0 +1,179 @@
+/* ============================================================
+   FlixRate – Search Results Page CSS
+   ============================================================ */
+
+.search-page {
+  max-width: 1100px; margin: 0 auto;
+  padding: calc(var(--nav-height) + 44px) 28px 100px;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.search-hero { margin-bottom: 36px; }
+.search-hero-label {
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+}
+.search-hero-query {
+  font-size: clamp(1.6rem, 4vw, 2.8rem); font-weight: 900;
+  color: var(--text-primary); line-height: 1.1;
+}
+.search-hero-query span {
+  background: linear-gradient(135deg, var(--accent-light), #e879f9);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.search-hero-count { color: var(--text-muted); font-size: 0.9rem; margin-top: 8px; }
+
+/* ── Big search box ───────────────────────────────────────── */
+.search-page-form {
+  display: flex; gap: 10px; margin-bottom: 32px;
+}
+.search-page-input-wrap {
+  flex: 1; display: flex; align-items: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border); border-radius: 50px;
+  padding: 0 20px; gap: 12px;
+  transition: border-color 0.18s, background 0.18s;
+}
+.search-page-input-wrap:focus-within {
+  border-color: rgba(124,58,237,0.45);
+  background: rgba(124,58,237,0.04);
+}
+.search-page-icon { color: var(--text-muted); flex-shrink: 0; }
+.search-page-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text-primary); font-size: 1rem; padding: 14px 0;
+  font-family: inherit;
+}
+.search-page-input::placeholder { color: var(--text-muted); }
+.search-page-submit {
+  padding: 14px 28px; border-radius: 50px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  border: none; color: white;
+  font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: opacity 0.15s, transform 0.15s;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.35);
+}
+.search-page-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── Type filter tabs ─────────────────────────────────────── */
+.search-tabs {
+  display: flex; gap: 6px; margin-bottom: 28px; flex-wrap: wrap;
+}
+.search-tab {
+  padding: 9px 20px; border-radius: 50px;
+  border: 1px solid var(--border);
+  background: none; color: var(--text-muted);
+  font-size: 0.84rem; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; font-family: inherit;
+}
+.search-tab:hover  { border-color: var(--border-hover); color: var(--text-secondary); }
+.search-tab.active {
+  background: rgba(124,58,237,0.14);
+  border-color: rgba(124,58,237,0.4);
+  color: var(--accent-light);
+}
+
+/* ── Results grid ─────────────────────────────────────────── */
+.search-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 20px; min-height: 300px;
+}
+
+/* Result card */
+.search-result-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.18s;
+  animation: slideUp 0.22s ease both;
+}
+.search-result-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.55);
+  border-color: rgba(124,58,237,0.3);
+}
+.src-poster-wrap  { position: relative; aspect-ratio: 2/3; overflow: hidden; }
+.src-poster       { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s; }
+.search-result-card:hover .src-poster { transform: scale(1.05); }
+.src-poster-ph    {
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  display: flex; align-items: center; justify-content: center; font-size: 3rem;
+}
+.src-score {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  border-radius: 6px; padding: 3px 8px;
+  font-size: 0.72rem; font-weight: 800; color: #fbbf24;
+}
+.src-type {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(124,58,237,0.85); backdrop-filter: blur(4px);
+  border-radius: 5px; padding: 2px 7px;
+  font-size: 0.6rem; font-weight: 800; color: white;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.src-body { padding: 10px 10px 12px; }
+.src-title {
+  font-size: 0.83rem; font-weight: 700; color: var(--text-primary);
+  line-height: 1.3; margin-bottom: 4px;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.src-meta { font-size: 0.7rem; color: var(--text-muted); }
+
+/* ── States ───────────────────────────────────────────────── */
+.search-loading, .search-empty-full {
+  grid-column: 1/-1; text-align: center; padding: 80px 20px;
+  color: var(--text-muted);
+}
+.search-spinner-lg {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid rgba(124,58,237,0.2);
+  border-top-color: var(--accent-light);
+  animation: spin 0.75s linear infinite;
+  margin: 0 auto 16px;
+}
+.search-empty-icon { font-size: 3.5rem; margin-bottom: 12px; opacity: 0.2; }
+.search-empty-label { font-size: 1rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; }
+
+/* ── Load more ────────────────────────────────────────────── */
+.search-load-more {
+  display: flex; justify-content: center; margin-top: 36px;
+}
+.search-more-btn {
+  padding: 13px 40px; border-radius: 50px;
+  background: rgba(124,58,237,0.12);
+  border: 1.5px solid rgba(124,58,237,0.3);
+  color: var(--accent-light); font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; transition: all 0.18s; font-family: inherit;
+  display: flex; align-items: center; gap: 8px;
+}
+.search-more-btn:hover { background: rgba(124,58,237,0.22); border-color: rgba(124,58,237,0.5); transform: translateY(-1px); }
+.search-more-btn:disabled { opacity: 0.4; pointer-events: none; }
+
+/* ── Suggestions / recent ─────────────────────────────────── */
+.search-suggestions { margin-bottom: 36px; }
+.search-sugg-label {
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.search-sugg-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+.search-sugg-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.search-sugg-chip {
+  padding: 7px 16px; border-radius: 50px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 0.82rem; cursor: pointer;
+  transition: all 0.15s; font-family: inherit;
+}
+.search-sugg-chip:hover { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.3); color: var(--accent-light); }
+
+@media (max-width: 768px) {
+  .search-page { padding-left: 16px; padding-right: 16px; }
+  .search-results-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+  .search-page-form { flex-direction: column; }
+}

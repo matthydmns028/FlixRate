@@ -1,0 +1,294 @@
+/* ============================================================
+   FlixRate – Browse / Genre Category Page
+   ============================================================ */
+
+/* ── Page shell ───────────────────────────────────────────── */
+.browse-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: calc(var(--nav-height) + 48px) 28px 100px;
+}
+
+/* ── Hero header ──────────────────────────────────────────── */
+.browse-hero {
+  text-align: center;
+  margin-bottom: 52px;
+}
+.browse-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--accent-light);
+  margin-bottom: 14px;
+  opacity: 0.8;
+}
+.browse-hero-title {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1.05;
+  letter-spacing: -1px;
+  margin-bottom: 14px;
+}
+.browse-hero-title span {
+  background: linear-gradient(135deg, var(--accent-light) 0%, #e879f9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.browse-hero-sub {
+  font-size: 1rem; color: var(--text-muted); max-width: 480px; margin: 0 auto;
+}
+
+/* ── Type tabs (Movies / Anime / TV) ─────────────────────── */
+.browse-type-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 44px;
+}
+.browse-type-tab {
+  padding: 11px 28px; border-radius: 50px;
+  font-size: 0.92rem; font-weight: 700;
+  border: 1.5px solid var(--border);
+  background: none; color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.18s;
+  display: flex; align-items: center; gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.browse-type-tab::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  opacity: 0; transition: opacity 0.18s;
+}
+.browse-type-tab span { position: relative; }
+.browse-type-tab:hover {
+  border-color: rgba(124,58,237,0.4);
+  color: var(--text-primary);
+}
+.browse-type-tab.active {
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+}
+.browse-type-tab.active::before { opacity: 1; }
+
+/* ── Genre section title ──────────────────────────────────── */
+.browse-section-title {
+  font-size: 0.72rem; font-weight: 800;
+  letter-spacing: 1.8px; text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.browse-section-title::after {
+  content: '';
+  flex: 1; height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+
+/* ── Genre grid ───────────────────────────────────────────── */
+.genre-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 14px;
+  margin-bottom: 56px;
+}
+
+.genre-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  padding: 24px 16px 20px;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.18s;
+  text-align: center;
+  min-height: 110px;
+  justify-content: center;
+  animation: fadeIn 0.3s ease both;
+}
+.genre-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+}
+.genre-card.active {
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.15), 0 12px 36px rgba(0,0,0,0.5);
+  transform: translateY(-2px);
+}
+.genre-card-bg {
+  position: absolute; inset: 0;
+  transition: opacity 0.2s;
+}
+.genre-card:hover .genre-card-bg { opacity: 0.9; }
+.genre-card-icon {
+  position: relative;
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+  transition: transform 0.2s;
+}
+.genre-card:hover .genre-card-icon { transform: scale(1.15); }
+.genre-card-name {
+  position: relative;
+  font-size: 0.82rem; font-weight: 800;
+  color: white;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+/* ── Results bar ──────────────────────────────────────────── */
+.results-bar {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.results-bar-label {
+  font-size: 1.1rem; font-weight: 800; color: var(--text-primary);
+  display: flex; align-items: center; gap: 10px;
+}
+.results-bar-count {
+  font-size: 0.78rem; font-weight: 700; color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  padding: 4px 12px; border-radius: 50px;
+  border: 1px solid var(--border);
+}
+.results-bar-sort {
+  display: flex; gap: 6px;
+}
+.sort-btn {
+  padding: 7px 16px; border-radius: 50px;
+  border: 1px solid var(--border);
+  background: none; color: var(--text-muted);
+  font-size: 0.78rem; font-weight: 700; cursor: pointer;
+  transition: all 0.15s;
+}
+.sort-btn:hover, .sort-btn.active {
+  background: rgba(124,58,237,0.15);
+  border-color: rgba(124,58,237,0.35);
+  color: var(--accent-light);
+}
+
+/* ── Results grid ─────────────────────────────────────────── */
+.browse-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 18px;
+  min-height: 300px;
+}
+
+/* Browse card */
+.browse-card {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.18s;
+  animation: slideUp 0.25s ease both;
+}
+.browse-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.55);
+  border-color: rgba(124,58,237,0.3);
+}
+.browse-card-poster-wrap {
+  position: relative;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+}
+.browse-card-poster {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform 0.3s;
+}
+.browse-card:hover .browse-card-poster { transform: scale(1.05); }
+.browse-card-poster-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem;
+}
+.browse-card-score {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  border-radius: 6px; padding: 3px 8px;
+  font-size: 0.72rem; font-weight: 800; color: #fbbf24;
+  display: flex; align-items: center; gap: 3px;
+}
+.browse-card-type {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(124,58,237,0.85); backdrop-filter: blur(4px);
+  border-radius: 5px; padding: 2px 7px;
+  font-size: 0.6rem; font-weight: 800; color: white;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.browse-card-body { padding: 10px 10px 12px; }
+.browse-card-title {
+  font-size: 0.82rem; font-weight: 700; color: var(--text-primary);
+  line-height: 1.3; margin-bottom: 4px;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.browse-card-meta { font-size: 0.7rem; color: var(--text-muted); }
+
+/* ── States ───────────────────────────────────────────────── */
+.browse-loading {
+  grid-column: 1 / -1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 20px; gap: 16px;
+  color: var(--text-muted); font-size: 0.9rem;
+}
+.browse-spinner {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 3px solid rgba(124,58,237,0.2);
+  border-top-color: var(--accent-light);
+  animation: spin 0.75s linear infinite;
+}
+.browse-empty {
+  grid-column: 1 / -1;
+  text-align: center; padding: 80px 20px;
+  color: var(--text-muted);
+}
+.browse-empty-icon { font-size: 3.5rem; margin-bottom: 12px; opacity: 0.2; }
+.browse-empty-text { font-size: 0.95rem; }
+
+/* ── Load more ────────────────────────────────────────────── */
+.browse-load-more {
+  display: flex; justify-content: center;
+  margin-top: 36px;
+}
+.btn-load-more {
+  padding: 13px 40px; border-radius: 50px;
+  background: rgba(124,58,237,0.12);
+  border: 1.5px solid rgba(124,58,237,0.3);
+  color: var(--accent-light); font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; transition: all 0.18s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-load-more:hover {
+  background: rgba(124,58,237,0.22);
+  border-color: rgba(124,58,237,0.5);
+  transform: translateY(-1px);
+}
+.btn-load-more:disabled { opacity: 0.4; pointer-events: none; }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .browse-page { padding-left: 16px; padding-right: 16px; }
+  .genre-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .browse-type-tabs { flex-wrap: wrap; }
+  .browse-type-tab { padding: 9px 20px; font-size: 0.84rem; }
+  .browse-results-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+}
+@media (max-width: 480px) {
+  .genre-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .genre-card { padding: 18px 10px 14px; min-height: 90px; }
+  .genre-card-icon { font-size: 1.6rem; }
+  .genre-card-name { font-size: 0.72rem; }
+}
