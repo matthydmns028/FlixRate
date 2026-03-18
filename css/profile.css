@@ -858,6 +858,16 @@
   border-color: rgba(34,197,94,0.25);
 }
 .friend-btn-friends:hover { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.25); }
+.form-error {
+  color: #f87171;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  display: none; /* Hidden by default */
+}
+
+.form-error.visible {
+  display: block; /* Shown when error exists */
+}
 
 /* Request accept/decline pair */
 .friend-request-btns { display: flex; gap: 6px; flex-shrink: 0; }

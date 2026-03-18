@@ -417,6 +417,7 @@
 }
 
 .vote-thanks {
+  margin-top: 7px;
   display: none;
   font-size: 0.82rem;
   color: var(--green);
@@ -426,6 +427,31 @@
 }
 .vote-thanks.visible {
   display: block;
+}
+
+.vote-delete-btn {
+  margin-top: 10px;
+    width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 19, 35, 0.981);
+  background: rgba(255, 59, 48, 0.15); /* Highly transparent Apple Red */
+  backdrop-filter: blur(12px); /* The frosted glass blur */
+  -webkit-backdrop-filter: blur(12px); /* Safari support */
+  border: 1px solid rgba(255, 59, 48, 0.3);
+  color: rgba(255, 19, 35, 0.981);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    opacity 0.18s,
+    transform 0.18s;
+  box-shadow: 0 4px 10px rgba(255, 59, 48, 0.15);
+}
+
+.vote-delete-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
 }
 
 /* Rating bar chart */

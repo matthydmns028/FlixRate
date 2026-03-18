@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View All - FlixRate</title>
+    <link rel="stylesheet" href="css/view-all.css" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="page-loaded">
+    <nav class="navbar">
+      <div class="nav-logo">
+        <a href="index.html"> <span>FLIX</span><span>RATE</span> </a>
+      </div>
+
+      <div class="nav-search">
+        <div id="search-form">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search in this category..."
+          />
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="view-all.html?type=movie">Movies</a></li>
+        <li><a href="view-all.html?type=anime">Anime</a></li>
+        <li><a href="view-all.html?type=tv">TV Series</a></li>
+            <li><a href="forum.html">Forum</a></li>
+            <li><a href="watchlist.html">🔖 Watchlist</a></li>
+
+      <div id="nav-user-area"></div>
+    </nav>
+
+    <main class="site-content container">
+      <header class="section-header">
+        <h2 class="section-title" id="pageTitle">Loading Content...</h2>
+      </header>
+
+      <div class="media-grid" id="mediaGrid">
+        <div class="search-loading">
+          <span class="spin">⏳</span> Fetching the latest hits...
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-logo"><span>FLIX</span><span>RATE</span></div>
+      <div class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Contact</a>
+        <a href="#">API Documentation</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 FlixRate. All rights reserved.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+      // Use your provided CONFIG
+      const CONFIG = {
+        TMDB_BEARER:
+          "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjNDZiMTZkMjU4ZGJkN2ViN2M0YmY2MDE3NjBhMzQ5ZSIsIm5iZiI6MTc3MzEwODM3Ny40NDQsInN1YiI6IjY5YWY3Yzk5ZmViODU5OTI1Yzc5NGQ4MCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.NnIuSBLCsNjVFtcdNeE3soE8xVtQQXsXW5T9jvwhgA8",
+        TMDB_BASE: "https://api.themoviedb.org/3",
+        TMDB_IMG_W500: "https://image.tmdb.org/t/p/w500",
+        JIKAN_BASE: "https://api.jikan.moe/v4",
+      };
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const type = urlParams.get("type") || "movie";
+      const grid = document.getElementById("mediaGrid");
+      const titleLabel = document.getElementById("pageTitle");
+      const searchInput = document.getElementById("searchInput");
+
+      let allData = [];
+
+      async function init() {
+        if (window.Auth && typeof window.Auth.init === "function")
+          window.Auth.init();
+        try {
+          if (type === "anime") {
+            titleLabel.innerText = "All Anime";
+            const resp = await fetch(`${CONFIG.JIKAN_BASE}/top/anime`);
+            const data = await resp.json();
+            allData = data.data.map((item) => ({
+              title: item.title,
+              year: item.aired.prop.from.year || "N/A",
+              image: item.images.jpg.large_image_url,
+            }));
+          } else {
+            titleLabel.innerText =
+              type === "movie" ? "All Movies" : "All TV Series";
+            const endpoint = type === "movie" ? "movie/popular" : "tv/popular";
+            const resp = await fetch(`${CONFIG.TMDB_BASE}/${endpoint}?page=1`, {
+              headers: { Authorization: `Bearer ${CONFIG.TMDB_BEARER}` },
+            });
+            const data = await resp.json();
+            allData = data.results.map((item) => ({
+              title: item.title || item.name,
+              year: (item.release_date || item.first_air_date || "").split(
+                "-",
+              )[0],
+              image: CONFIG.TMDB_IMG_W500 + item.poster_path,
+            }));
+          }
+          render(allData);
+        } catch (err) {
+          grid.innerHTML = `<div class="search-empty">Failed to load content. Please check your connection.</div>`;
+        }
+      }
+
+      function render(items) {
+        if (items.length === 0) {
+          grid.innerHTML = `<div class="search-empty">No results found for your search.</div>`;
+          return;
+        }
+        grid.innerHTML = items
+          .map(
+            (item) => `
+                <div class="media-card">
+                    <div class="card-img-wrap">
+                        <img src="${item.image}" class="card-img" alt="${item.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x300?text=No+Poster'">
+                        <div class="card-overlay">
+                            <div class="card-play-icon">▶</div>
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <h3 class="card-title">${item.title}</h3>
+                        <p class="card-sub">${item.year}</p>
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+      }
+
+      // Live Search logic
+      searchInput.addEventListener("input", (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = allData.filter((m) =>
+          m.title.toLowerCase().includes(term),
+        );
+        render(filtered);
+      });
+
+      init();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,157 @@
+/* Import the Global Variables to match your dashboard */
+:root {
+    --bg-primary: #0a0a0f;
+    --text-primary: #f0f0f8;
+    --text-secondary: #9999bb;
+    --accent: #7c3aed;
+    --nav-height: 68px;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* --- Navbar Layout --- */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-height, 68px);
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    background: rgba(10, 10, 15, 0.98);
+    backdrop-filter: blur(12px);
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- Navigation Links (Fixes the vertical list/bullets) --- */
+.nav-links {
+    display: flex;            /* Makes links horizontal */
+    list-style: none;         /* Removes the bullet points */
+    margin: 0;
+    padding: 0;
+    gap: 15px;                /* Spacing between links */
+    margin-right: auto;       /* This pushes the search/profile to the right */
+    margin-left: 30px;        /* Spacing away from the logo */
+}
+
+.nav-links li {
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #9999bb;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: #ffffff;
+}
+
+/* --- Search Bar --- */
+.nav-search {
+    margin-right: 20px;       /* Spacing between search and profile */
+}
+
+#search-form {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    padding: 5px 15px;
+}
+
+#searchInput {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 5px;
+    width: 200px;
+}
+
+/* --- User Profile (Right Side) --- */
+#nav-user-area {
+    display: flex;
+    align-items: center;
+}
+
+.nav-user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 5px 12px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}/* MAIN CONTENT SPACING */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    /* This padding prevents content from hiding under the navbar */
+    padding: calc(var(--nav-height) + 40px) 28px 40px; 
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    border-left: 4px solid var(--accent);
+    padding-left: 15px;
+}
+
+/* GRID FIX: Forces items into a proper grid instead of one giant column */
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 30px;
+}
+
+/* CARD STYLING */
+.media-card {
+    transition: transform 0.3s ease;
+}
+
+.media-card:hover {
+    transform: translateY(-10px);
+}
+
+.card-img-wrap {
+    position: relative;
+    aspect-ratio: 2/3;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #16161f;
+    margin-bottom: 10px;
+}
+
+.card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-sub {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}

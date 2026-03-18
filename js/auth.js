@@ -136,3 +136,5 @@ const Auth = (() => {
 
   return { register, login, logout, confirmLogout, hideLogoutModal, doLogout, isLoggedIn, getSession, updateNavbar, init };
 })();
+
+window.Auth = Auth;

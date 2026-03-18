@@ -14,17 +14,14 @@
 
   <div class="login-wrapper">
 
-    <!-- Logo -->
     <div class="login-logo">
       <a href="index.html" aria-label="FlixRate Home">
         <span>FLIX</span><span>RATE</span>
       </a>
     </div>
 
-    <!-- Card -->
     <div class="login-card" role="main">
 
-      <!-- Tab switcher -->
       <div class="login-tabs" role="tablist">
         <button class="login-tab-btn active" id="tab-login"
           role="tab" aria-selected="true" aria-controls="form-login"
@@ -34,10 +31,8 @@
           onclick="switchTab('register')">Create Account</button>
       </div>
 
-      <!-- Alert box -->
       <div id="form-alert" class="form-alert" role="alert"></div>
 
-      <!-- ── Login Form ──────────────────────────────── -->
       <form class="login-form form--active" id="form-login"
         role="tabpanel" aria-labelledby="tab-login"
         novalidate onsubmit="handleLogin(event)">
@@ -54,7 +49,7 @@
             <input type="text" id="login-email" class="form-input"
               placeholder="you@example.com or username" autocomplete="username" required>
           </div>
-          <span class="form-error" id="login-email-err">Please enter a valid email or username.</span>
+          <span class="form-error" id="login-email-err">Please enter an email or username.</span>
         </div>
 
         <div class="form-group">
@@ -78,10 +73,27 @@
           <span class="form-error" id="login-pw-err">Password is required.</span>
         </div>
 
+        <div style="text-align: right; margin-top: 8px; margin-bottom: 16px;">
+          <a href="#" onclick="showResetForm(); return false;" style="color: var(--accent-light); font-size: 0.85rem; text-decoration: none;">Forgot Password?</a>
+        </div>
+
         <button type="submit" class="form-submit" id="login-submit">Sign In</button>
+
+        <div class="auth-divider" style="margin-top: 24px;">
+          <span>OR</span>
+        </div>
+
+        <button type="button" class="btn-google" onclick="handleGoogleLogin()">
+          <svg width="20" height="20" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Continue with Google
+        </button>
       </form>
 
-      <!-- ── Register Form ───────────────────────────── -->
       <form class="login-form" id="form-register"
         role="tabpanel" aria-labelledby="tab-register"
         novalidate onsubmit="handleRegister(event)">
@@ -153,19 +165,54 @@
         </div>
 
         <button type="submit" class="form-submit" id="reg-submit">Create Account</button>
+
+        <div class="auth-divider">
+          <span>OR</span>
+        </div>
+
+        <button type="button" class="btn-google" onclick="handleGoogleLogin()">
+          <svg width="20" height="20" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Continue with Google
+        </button>
       </form>
 
-    </div><!-- /login-card -->
+      <form class="login-form" id="form-reset" role="tabpanel" novalidate onsubmit="handleResetPassword(event)">
+        <h2 style="font-size: 1.2rem; margin-bottom: 16px; text-align: center;">Reset Password</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; text-align: center;">Enter your email and we'll send you a secure link to reset your password.</p>
+        
+        <div class="form-group">
+          <label class="form-label" for="reset-email">Email address</label>
+          <div class="form-input-wrap">
+            <span class="form-input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </span>
+            <input type="email" id="reset-email" class="form-input" placeholder="you@example.com" required>
+          </div>
+          <span class="form-error" id="reset-email-err">Please enter a valid email.</span>
+        </div>
+        
+        <button type="submit" class="form-submit" id="reset-submit">Send Reset Link</button>
+        
+        <div style="text-align: center; margin-top: 16px;">
+          <a href="#" onclick="switchTab('login'); return false;" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">← Back to Sign In</a>
+        </div>
+      </form>
 
-    <p class="login-back">
+    </div><p class="login-back">
       <a href="index.html" aria-label="Back to home">← Back to FlixRate</a>
     </p>
 
-  </div><!-- /login-wrapper -->
-
-  <!-- Scripts -->
-  <script src="js/config.js"></script>
-  <script src="js/auth.js"></script>
+  </div><script src="js/config.js"></script>
+  <script type="module" src="js/firebase-init.js"></script>
+  <script type="module" src="js/auth.js"></script>
   <script>
     // ── Tab switching ──────────────────────────────────────
     function switchTab(tab) {
@@ -175,8 +222,12 @@
         b.setAttribute('aria-selected', 'false');
       });
       document.getElementById('form-' + tab).classList.add('form--active');
-      document.getElementById('tab-' + tab).classList.add('active');
-      document.getElementById('tab-' + tab).setAttribute('aria-selected', 'true');
+      
+      const tabBtn = document.getElementById('tab-' + tab);
+      if (tabBtn) {
+        tabBtn.classList.add('active');
+        tabBtn.setAttribute('aria-selected', 'true');
+      }
       hideAlert();
     }
 
@@ -210,6 +261,19 @@
       hideAlert();
     }
 
+    // ── Google Login Handler ───────────────────────────────
+    async function handleGoogleLogin() {
+      clearErrors();
+      const result = await Auth.loginWithGoogle();
+      
+      if (result.success) {
+        showAlert('Google Sign-In successful! Redirecting…', 'success');
+        setTimeout(() => window.location.href = 'index.html', 1200);
+      } else {
+        showAlert(result.message);
+      }
+    }
+
     // ── Login handler ──────────────────────────────────────
     function handleLogin(e) {
       e.preventDefault();
@@ -229,11 +293,11 @@
       const btn = document.getElementById('login-submit');
       btn.textContent = 'Signing in…'; btn.disabled = true;
 
-      setTimeout(() => {
-        const result = Auth.login(credential, password);
+      setTimeout(async () => {
+        const result = await Auth.login(credential, password); 
         btn.textContent = 'Sign In'; btn.disabled = false;
         if (result.success) {
-          showAlert('Welcome back, ' + result.user.username + '! Redirecting…', 'success');
+          showAlert('Welcome back! Redirecting…', 'success');
           setTimeout(() => window.location.href = 'index.html', 1200);
         } else {
           showAlert(result.message);
@@ -268,16 +332,49 @@
       const btn = document.getElementById('reg-submit');
       btn.textContent = 'Creating…'; btn.disabled = true;
 
-      setTimeout(() => {
-        const result = Auth.register(username, email, password);
+      setTimeout(async () => {
+        const result = await Auth.register(username, email, password); 
         btn.textContent = 'Create Account'; btn.disabled = false;
         if (result.success) {
-          showAlert('Account created! Welcome, ' + result.user.username + '! Redirecting…', 'success');
+          showAlert('Account created! Redirecting…', 'success');
           setTimeout(() => window.location.href = 'index.html', 1200);
         } else {
           showAlert(result.message);
         }
       }, 700);
+    }
+
+    // ── Forgot Password Handlers ───────────────────────────
+    function showResetForm() {
+      document.querySelectorAll('.login-form').forEach(f => f.classList.remove('form--active'));
+      document.querySelectorAll('.login-tab-btn').forEach(b => b.classList.remove('active'));
+      clearErrors();
+      document.getElementById('form-reset').classList.add('form--active');
+    }
+
+    async function handleResetPassword(e) {
+      e.preventDefault();
+      clearErrors();
+      const email = document.getElementById('reset-email').value.trim();
+      
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showErr('reset-email-err', 'Please enter a valid email.'); 
+        return;
+      }
+
+      const btn = document.getElementById('reset-submit');
+      btn.textContent = 'Sending…'; btn.disabled = true;
+
+      const result = await Auth.resetPassword(email);
+      
+      btn.textContent = 'Send Reset Link'; btn.disabled = false;
+
+      if (result.success) {
+        showAlert('Check your inbox! A secure reset link has been sent.', 'success');
+        document.getElementById('reset-email').value = ''; 
+      } else {
+        showAlert(result.message);
+      }
     }
   </script>
 

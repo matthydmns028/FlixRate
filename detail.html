@@ -9,6 +9,7 @@
     />
     <title>Loading… – FlixRate</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="icon" type="image/png" href="img/Logo.png" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/detail.css" />
@@ -49,7 +50,8 @@
         <li><a href="browse.html?type=movie">Movies</a></li>
         <li><a href="browse.html?type=anime">Anime</a></li>
         <li><a href="browse.html?type=tv">TV Series</a></li>
-        <li><a href="forum.html" style="color:var(--accent-light)">Forum</a></li>
+        <li><a href="forum.html">Forum</a></li>
+        <li><a href="watchlist.html">🔖 Watchlist</a></li>
       </ul>
 
       <div id="nav-user-area"></div>
@@ -390,6 +392,15 @@
             <button class="vote-submit-btn" id="vote-submit-btn">
               Submit Rating
             </button>
+
+            <button
+              class="vote-delete-btn"
+              id="vote-remove-btn"
+              style="display: none"
+            >
+              Delete Rating
+            </button>
+
             <div class="vote-thanks" id="vote-thanks"></div>
 
             <!-- Distribution bars -->
@@ -447,10 +458,13 @@
 
     <!-- ══════════════════ SCRIPTS ══════════════════ -->
     <script src="js/config.js"></script>
+    <script src="js/api.js"></script><script src="js/global_search.js"></script>
+    <script type="module" src="js/firebase-init.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/api.js"></script>
+    <script type="module" src="js/detail.js"></script>
     <script src="js/colorExtractor.js"></script>
-    <script src="js/detail.js"></script>
+    <script type="module" src="js/contextmenu.js"></script>
+    <script src="js/transitions.js"></script>
 
     <script>
       // Navbar scroll effect

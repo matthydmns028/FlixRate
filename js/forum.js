@@ -1,10 +1,22 @@
 // ============================================================
-// FlixRate – Forum Module (mini social feed with image support)
-// All data stored in localStorage for demo purposes
+// FlixRate – Forum Module (FIREBASE VERSION)
 // ============================================================
 
+import { auth, db } from "./firebase-init.js";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
+  increment,
+  arrayUnion,
+  query,
+  orderBy,
+} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
 const Forum = (() => {
-  const POSTS_KEY = "flixrate_forum_posts";
   const LIKES_KEY = "flixrate_forum_likes";
   const BOOKMARKS_KEY = "flixrate_forum_bookmarks";
 
@@ -36,10 +48,8 @@ const Forum = (() => {
     imageDataUrl: null,
   };
 
-  // ── Storage ────────────────────────────────────────────────
-  function getPosts() {
-    return JSON.parse(localStorage.getItem(POSTS_KEY) || "[]");
-  }
+  let cloudPosts = [];
+
   function getLikes() {
     return JSON.parse(localStorage.getItem(LIKES_KEY) || "{}");
   }
@@ -47,14 +57,6 @@ const Forum = (() => {
     return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || "{}");
   }
 
-  function savePosts(posts) {
-    localStorage.setItem(POSTS_KEY, JSON.stringify(posts));
-  }
-
-  // ── Helpers ────────────────────────────────────────────────
-  function uid() {
-    return `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-  }
   function esc(str) {
     if (!str) return "";
     return str
@@ -79,9 +81,19 @@ const Forum = (() => {
     return (name || "?").charAt(0).toUpperCase();
   }
 
-  // ── Filter & sort posts ────────────────────────────────────
+  async function fetchPosts() {
+    try {
+      const q = query(collection(db, "forum_posts"), orderBy("ts", "desc"));
+      const snap = await getDocs(q);
+      cloudPosts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    } catch (e) {
+      console.error("Failed to fetch forum posts:", e);
+      showToast("Could not load posts. Please refresh.");
+    }
+  }
+
   function getFilteredPosts() {
-    let posts = getPosts();
+    let posts = [...cloudPosts];
 
     if (state.activeCategory !== "all") {
       posts = posts.filter((p) => p.category === state.activeCategory);
@@ -96,32 +108,29 @@ const Forum = (() => {
       );
     }
     if (state.sort === "popular") {
-      posts = [...posts].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+      posts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
     } else if (state.sort === "discussed") {
-      posts = [...posts].sort(
+      posts.sort(
         (a, b) => (b.comments?.length || 0) - (a.comments?.length || 0),
       );
     } else {
-      posts = [...posts].sort((a, b) => b.ts - a.ts);
+      posts.sort((a, b) => b.ts - a.ts);
     }
     return posts;
   }
 
-  // ── Category counts ────────────────────────────────────────
   function getCategoryCounts() {
-    const posts = getPosts();
     const counts = {};
     CATEGORIES.forEach((c) => {
       counts[c.id] = 0;
     });
-    counts["all"] = posts.length;
-    posts.forEach((p) => {
+    counts["all"] = cloudPosts.length;
+    cloudPosts.forEach((p) => {
       if (p.category) counts[p.category] = (counts[p.category] || 0) + 1;
     });
     return counts;
   }
 
-  // ── Render category sidebar ────────────────────────────────
   function renderSidebar() {
     const list = document.getElementById("category-list");
     if (!list) return;
@@ -131,7 +140,7 @@ const Forum = (() => {
       (cat) => `
       <li class="category-item">
         <button class="${state.activeCategory === cat.id ? "active" : ""}"
-                onclick="Forum.setCategory('${cat.id}')">
+                onclick="window.Forum.setCategory('${cat.id}')">
           <span class="category-icon">${cat.icon}</span>
           ${cat.label}
           <span class="category-count">${counts[cat.id] || 0}</span>
@@ -140,7 +149,6 @@ const Forum = (() => {
     ).join("");
   }
 
-  // ── Render feed ────────────────────────────────────────────
   function renderFeed() {
     const feedEl = document.getElementById("post-feed");
     if (!feedEl) return;
@@ -148,25 +156,34 @@ const Forum = (() => {
     const posts = getFilteredPosts();
     const likes = getLikes();
     const bmarks = getBookmarks();
-    const session = Auth.getSession();
+    const session = window.Auth.getSession();
+    const myAvatar = localStorage.getItem("flixrate_profile_avatar");
+
+    let html = "";
+    if (state.searchQuery) {
+      html += `<div style="margin-bottom: 20px; font-weight: 500; font-size: 1.1rem; color: var(--accent-light);">Search results for "${esc(state.searchQuery)}" (${posts.length})</div>`;
+    }
 
     if (posts.length === 0) {
-      feedEl.innerHTML = `
+      feedEl.innerHTML =
+        html +
+        `
         <div class="feed-empty">
           <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          <h3>No posts yet</h3>
-          <p>Be the first to start a discussion!</p>
+          <h3>${state.searchQuery ? "No results found" : "No posts yet"}</h3>
+          <p>${state.searchQuery ? "Try adjusting your search terms." : "Be the first to start a discussion!"}</p>
         </div>`;
       return;
     }
 
-    feedEl.innerHTML = posts
-      .map((post) => renderPostCard(post, likes, bmarks, session))
-      .join("");
+    feedEl.innerHTML =
+      html +
+      posts
+        .map((post) => renderPostCard(post, likes, bmarks, session, myAvatar))
+        .join("");
 
-    // Expand post texts
     feedEl.querySelectorAll(".post-text").forEach((el) => {
       if (el.scrollHeight > el.clientHeight + 4) {
         const btn = el.nextElementSibling;
@@ -176,22 +193,30 @@ const Forum = (() => {
     });
   }
 
-  function renderPostCard(post, likes, bmarks, session) {
+  function renderPostCard(post, likes, bmarks, session, myAvatar) {
     const liked = likes[post.id] || false;
     const bmarked = bmarks[post.id] || false;
     const catColor = CAT_COLORS[post.category] || "cat-general";
     const catMeta =
       CATEGORIES.find((c) => c.id === post.category) || CATEGORIES[6];
+
+    // 🟨 THE ILLUSION: Inject live local avatar for the Post Author
     const isOwner = session?.username === post.author;
+    const authorAvatarHtml =
+      isOwner && myAvatar
+        ? `<img src="${myAvatar}" alt="${esc(post.author)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : avatarLetter(post.author);
+    const authorAvatarBg =
+      isOwner && myAvatar ? "transparent" : avatarColor(post.author);
 
     const commentCount = post.comments?.length || 0;
 
     return `
       <div class="post-card" id="post-${post.id}">
         <div class="post-card-header">
-          <div class="post-avatar" style="background:${avatarColor(post.author)}"
+          <div class="post-avatar" style="background:${authorAvatarBg}; padding:0; overflow:hidden;"
                title="${esc(post.author)}">
-            ${avatarLetter(post.author)}
+            ${authorAvatarHtml}
           </div>
           <div class="post-meta">
             <div class="post-author">${esc(post.author)}</div>
@@ -202,33 +227,33 @@ const Forum = (() => {
             </div>
           </div>
           <div class="post-card-menu">
-            <button class="post-menu-btn" onclick="Forum.toggleMenu('${post.id}')" aria-label="Post options">
+            <button class="post-menu-btn" onclick="window.Forum.toggleMenu('${post.id}')" aria-label="Post options">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
               </svg>
             </button>
             <div class="post-dropdown" id="menu-${post.id}">
-              <button onclick="Forum.copyPostLink('${post.id}')">🔗 Copy Link</button>
-              ${isOwner ? `<button class="danger" onclick="Forum.deletePost('${post.id}')">🗑️ Delete Post</button>` : `<button onclick="Forum.reportPost('${post.id}')">⚑ Report</button>`}
+              <button onclick="window.Forum.copyPostLink('${post.id}')">🔗 Copy Link</button>
+              ${isOwner ? `<button class="danger" onclick="window.Forum.deletePost('${post.id}')">🗑️ Delete Post</button>` : `<button onclick="window.Forum.reportPost('${post.id}')">⚑ Report</button>`}
             </div>
           </div>
         </div>
 
         <div class="post-body">
-          ${post.title ? `<div class="post-title" onclick="Forum.toggleComments('${post.id}')">${esc(post.title)}</div>` : ""}
+          ${post.title ? `<div class="post-title" onclick="window.Forum.toggleComments('${post.id}')">${esc(post.title)}</div>` : ""}
           ${
             post.text
               ? `
             <p class="post-text collapsed" id="pt-${post.id}">${esc(post.text)}</p>
             <button class="post-read-more" style="display:none"
-                    onclick="Forum.toggleExpand('${post.id}')">Read more</button>
+                    onclick="window.Forum.toggleExpand('${post.id}')">Read more</button>
           `
               : ""
           }
           ${
             post.image
               ? `
-            <div class="post-image-wrap" onclick="Forum.openLightbox('${post.id}')">
+            <div class="post-image-wrap" onclick="window.Forum.openLightbox('${post.id}')">
               <img src="${post.image}" alt="Post image" class="post-image" loading="lazy">
             </div>
           `
@@ -238,7 +263,7 @@ const Forum = (() => {
             post.tags?.length
               ? `
             <div class="post-tags">
-              ${post.tags.map((t) => `<span class="post-tag" onclick="Forum.searchTag('${esc(t)}')">#${esc(t)}</span>`).join("")}
+              ${post.tags.map((t) => `<span class="post-tag" onclick="window.Forum.searchTag('${esc(t)}')">#${esc(t)}</span>`).join("")}
             </div>`
               : ""
           }
@@ -246,7 +271,7 @@ const Forum = (() => {
 
         <div class="post-actions">
           <button class="post-action-btn ${liked ? "liked" : ""}"
-                  onclick="Forum.toggleLike('${post.id}')">
+                  onclick="window.Forum.toggleLike('${post.id}')">
             <svg width="15" height="15" viewBox="0 0 24 24"
                  fill="${liked ? "currentColor" : "none"}"
                  stroke="currentColor" stroke-width="2">
@@ -254,7 +279,7 @@ const Forum = (() => {
             </svg>
             ${post.likes || 0}
           </button>
-          <button class="post-action-btn" onclick="Forum.toggleComments('${post.id}')">
+          <button class="post-action-btn" onclick="window.Forum.toggleComments('${post.id}')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
@@ -262,7 +287,7 @@ const Forum = (() => {
           </button>
           <div class="post-action-sep"></div>
           <button class="post-action-btn ${bmarked ? "bookmarked" : ""}"
-                  onclick="Forum.toggleBookmark('${post.id}')" title="${bmarked ? "Saved" : "Save"}">
+                  onclick="window.Forum.toggleBookmark('${post.id}')" title="${bmarked ? "Saved" : "Save"}">
             <svg width="15" height="15" viewBox="0 0 24 24"
                  fill="${bmarked ? "currentColor" : "none"}"
                  stroke="currentColor" stroke-width="2">
@@ -270,7 +295,7 @@ const Forum = (() => {
             </svg>
             ${bmarked ? "Saved" : "Save"}
           </button>
-          <button class="post-action-btn" onclick="Forum.sharePost('${post.id}')">
+          <button class="post-action-btn" onclick="window.Forum.sharePost('${post.id}')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
               <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
@@ -280,16 +305,16 @@ const Forum = (() => {
         </div>
 
         <div class="post-comments" id="comments-${post.id}">
-          ${renderPostComments(post)}
+          ${renderPostComments(post, session, myAvatar)}
           <div class="comment-input-row">
             <div class="comment-mini-avatar"
-                 style="background:${session ? avatarColor(session.username) : "#4b5563"}">
-              ${session ? avatarLetter(session.username) : "?"}
+                 style="background:${session && myAvatar ? "transparent" : session ? avatarColor(session.username) : "#4b5563"}; padding:0; overflow:hidden;">
+              ${session && myAvatar ? `<img src="${myAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : session ? avatarLetter(session.username) : "?"}
             </div>
             <input class="comment-mini-input" placeholder="${session ? "Write a reply…" : "Sign in to comment"}"
                    id="ci-${post.id}" ${!session ? "disabled" : ""}
-                   onkeydown="if(event.key==='Enter')Forum.submitComment('${post.id}')">
-            <button class="comment-mini-send" onclick="Forum.submitComment('${post.id}')"
+                   onkeydown="if(event.key==='Enter')window.Forum.submitComment('${post.id}')">
+            <button class="comment-mini-send" onclick="window.Forum.submitComment('${post.id}')"
                     ${!session ? "disabled" : ""}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
                 <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -300,32 +325,40 @@ const Forum = (() => {
       </div>`;
   }
 
-  function renderPostComments(post) {
+  function renderPostComments(post, session, myAvatar) {
     if (!post.comments?.length)
       return '<p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;">No replies yet. Start the conversation!</p>';
+
     return post.comments
-      .map(
-        (c) => `
+      .map((c) => {
+        // 🟨 THE ILLUSION: Inject live local avatar for Comment Replies
+        const isMe = session && c.author === session.username;
+        const cAvatarHtml =
+          isMe && myAvatar
+            ? `<img src="${myAvatar}" alt="${esc(c.author)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+            : avatarLetter(c.author);
+        const cAvatarBg =
+          isMe && myAvatar ? "transparent" : avatarColor(c.author);
+
+        return `
       <div class="post-comment-item">
-        <div class="comment-mini-avatar" style="background:${avatarColor(c.author)}">
-          ${avatarLetter(c.author)}
+        <div class="comment-mini-avatar" style="background:${cAvatarBg}; padding:0; overflow:hidden;">
+          ${cAvatarHtml}
         </div>
         <div class="comment-mini-bubble">
           <div class="comment-mini-name">${esc(c.author)} <span style="font-weight:400;color:var(--text-muted);font-size:0.72rem;">${timeAgo(c.ts)}</span></div>
           <div class="comment-mini-text">${esc(c.text)}</div>
         </div>
-      </div>`,
-      )
+      </div>`;
+      })
       .join("");
   }
 
-  // ── Trending widget ────────────────────────────────────────
   function renderTrending() {
     const el = document.getElementById("trending-topics");
     if (!el) return;
-    const posts = getPosts();
     const tagCount = {};
-    posts.forEach((p) =>
+    cloudPosts.forEach((p) =>
       (p.tags || []).forEach((t) => {
         tagCount[t] = (tagCount[t] || 0) + 1;
       }),
@@ -342,7 +375,7 @@ const Forum = (() => {
     el.innerHTML = sorted
       .map(
         ([tag, count], i) => `
-      <div class="trending-item" onclick="Forum.searchTag('${esc(tag)}')">
+      <div class="trending-item" onclick="window.Forum.searchTag('${esc(tag)}')">
         <span class="trending-num">${i + 1}</span>
         <div class="trending-info">
           <div class="trending-tag">#${esc(tag)}</div>
@@ -353,37 +386,46 @@ const Forum = (() => {
       .join("");
   }
 
-  // ── Online users widget ────────────────────────────────────
   function renderOnlineUsers() {
     const el = document.getElementById("online-users");
     if (!el) return;
-    const posts = getPosts();
-    const users = [...new Set(posts.slice(0, 20).map((p) => p.author))].slice(
-      0,
-      12,
-    );
+    const users = [
+      ...new Set(cloudPosts.slice(0, 20).map((p) => p.author)),
+    ].slice(0, 12);
+
     if (!users.length) {
       el.innerHTML =
         '<p style="font-size:0.82rem;color:var(--text-muted)">No one online yet.</p>';
       return;
     }
+
+    const session = window.Auth.getSession();
+    const myAvatar = localStorage.getItem("flixrate_profile_avatar");
+
     el.innerHTML =
       `<div class="online-avatars">` +
       users
-        .map(
-          (u) => `
-        <div class="online-avatar" style="background:${avatarColor(u)}" title="${esc(u)}">
-          ${avatarLetter(u)}
+        .map((u) => {
+          // 🟨 THE ILLUSION: Even update the active user avatars widget!
+          const isMe = session && u === session.username;
+          const uAvatarHtml =
+            isMe && myAvatar
+              ? `<img src="${myAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+              : avatarLetter(u);
+          const uAvatarBg = isMe && myAvatar ? "transparent" : avatarColor(u);
+
+          return `
+        <div class="online-avatar" style="background:${uAvatarBg}; padding:0; overflow:hidden;" title="${esc(u)}">
+          ${uAvatarHtml}
           <span class="online-dot"></span>
-        </div>`,
-        )
+        </div>`;
+        })
         .join("") +
       `</div>`;
   }
 
-  // ── Like ───────────────────────────────────────────────────
-  function toggleLike(postId) {
-    const session = Auth.getSession();
+  async function toggleLike(postId) {
+    const session = window.Auth.getSession();
     if (!session) {
       openLoginPrompt();
       return;
@@ -394,19 +436,20 @@ const Forum = (() => {
     likes[postId] = isLiked;
     localStorage.setItem(LIKES_KEY, JSON.stringify(likes));
 
-    const posts = getPosts();
-    const post = posts.find((p) => p.id === postId);
-    if (post) {
-      post.likes = Math.max(0, (post.likes || 0) + (isLiked ? 1 : -1));
-      savePosts(posts);
-    }
+    const post = cloudPosts.find((p) => p.id === postId);
+    if (post) post.likes = Math.max(0, (post.likes || 0) + (isLiked ? 1 : -1));
     renderFeed();
-    renderSidebar();
+
+    try {
+      const ref = doc(db, "forum_posts", postId);
+      await updateDoc(ref, { likes: increment(isLiked ? 1 : -1) });
+    } catch (e) {
+      console.error("Failed to update like", e);
+    }
   }
 
-  // ── Bookmark ───────────────────────────────────────────────
   function toggleBookmark(postId) {
-    const session = Auth.getSession();
+    const session = window.Auth.getSession();
     if (!session) {
       openLoginPrompt();
       return;
@@ -417,9 +460,8 @@ const Forum = (() => {
     renderFeed();
   }
 
-  // ── Comment ───────────────────────────────────────────────
-  function submitComment(postId) {
-    const session = Auth.getSession();
+  async function submitComment(postId) {
+    const session = window.Auth.getSession();
     if (!session) {
       openLoginPrompt();
       return;
@@ -429,54 +471,66 @@ const Forum = (() => {
     const text = input?.value.trim();
     if (!text || text.length < 1) return;
 
-    const posts = getPosts();
-    const post = posts.find((p) => p.id === postId);
-    if (!post) return;
-
-    if (!post.comments) post.comments = [];
-    post.comments.push({ author: session.username, text, ts: Date.now() });
-    savePosts(posts);
-
-    if (input) input.value = "";
-
-    // Re-render just this post's comment section
-    const commentsEl = document.getElementById(`comments-${postId}`);
-    if (commentsEl) {
-      const open = commentsEl.classList.contains("open");
-      renderFeed();
-      if (open)
-        document.getElementById(`comments-${postId}`)?.classList.add("open");
+    if (input) {
+      input.disabled = true;
+      input.value = "Posting...";
     }
-    renderSidebar();
-    renderTrending();
+
+    const commentObj = { author: session.username, text, ts: Date.now() };
+
+    try {
+      const ref = doc(db, "forum_posts", postId);
+      await updateDoc(ref, { comments: arrayUnion(commentObj) });
+      if (input) {
+        input.value = "";
+        input.disabled = false;
+      }
+
+      await fetchPosts();
+      const commentsEl = document.getElementById(`comments-${postId}`);
+      const wasOpen = commentsEl
+        ? commentsEl.classList.contains("open")
+        : false;
+      renderAll();
+      if (wasOpen)
+        document.getElementById(`comments-${postId}`)?.classList.add("open");
+    } catch (e) {
+      console.error("Failed to post comment", e);
+      alert("Failed to post comment.");
+      if (input) {
+        input.value = text;
+        input.disabled = false;
+      }
+    }
   }
 
-  // ── Comments toggle ────────────────────────────────────────
   function toggleComments(postId) {
     document.getElementById(`comments-${postId}`)?.classList.toggle("open");
   }
 
-  // ── Delete post ────────────────────────────────────────────
-  function deletePost(postId) {
+  async function deletePost(postId) {
     if (!confirm("Delete this post? This cannot be undone.")) return;
-    const posts = getPosts().filter((p) => p.id !== postId);
-    savePosts(posts);
-    renderAll();
+    try {
+      await deleteDoc(doc(db, "forum_posts", postId));
+      await fetchPosts();
+      renderAll();
+      showToast("Post deleted.");
+    } catch (e) {
+      console.error("Failed to delete post", e);
+      alert("Failed to delete post.");
+    }
   }
 
-  // ── Menu toggle ────────────────────────────────────────────
   function toggleMenu(postId) {
     const menu = document.getElementById(`menu-${postId}`);
     if (!menu) return;
     const isOpen = menu.classList.contains("open");
-    // Close all
     document
       .querySelectorAll(".post-dropdown.open")
       .forEach((m) => m.classList.remove("open"));
     if (!isOpen) menu.classList.add("open");
   }
 
-  // ── Expand post text ───────────────────────────────────────
   function toggleExpand(postId) {
     const el = document.getElementById(`pt-${postId}`);
     const btn = el?.nextElementSibling;
@@ -485,14 +539,12 @@ const Forum = (() => {
     btn.textContent = collapsed ? "Read more" : "Show less";
   }
 
-  // ── Category ───────────────────────────────────────────────
   function setCategory(catId) {
     state.activeCategory = catId;
     renderSidebar();
     renderFeed();
   }
 
-  // ── Sort ───────────────────────────────────────────────────
   function setSort(sortKey) {
     state.sort = sortKey;
     document.querySelectorAll(".sort-tab").forEach((btn) => {
@@ -501,7 +553,6 @@ const Forum = (() => {
     renderFeed();
   }
 
-  // ── Search ─────────────────────────────────────────────────
   function searchTag(tag) {
     state.searchQuery = tag;
     const input = document.getElementById("forum-search-input");
@@ -514,7 +565,6 @@ const Forum = (() => {
     renderFeed();
   }
 
-  // ── Share / copy ───────────────────────────────────────────
   function copyPostLink(postId) {
     const url = `${window.location.href.split("?")[0]}?post=${postId}`;
     navigator.clipboard?.writeText(url).catch(() => {});
@@ -534,10 +584,8 @@ const Forum = (() => {
       .forEach((m) => m.classList.remove("open"));
   }
 
-  // ── Lightbox ───────────────────────────────────────────────
   function openLightbox(postId) {
-    const posts = getPosts();
-    const post = posts.find((p) => p.id === postId);
+    const post = cloudPosts.find((p) => p.id === postId);
     if (!post?.image) return;
     const lb = document.getElementById("lightbox");
     const img = document.getElementById("lightbox-img");
@@ -550,7 +598,6 @@ const Forum = (() => {
     document.getElementById("lightbox")?.classList.remove("open");
   }
 
-  // ── Toast ──────────────────────────────────────────────────
   function showToast(msg) {
     const t = document.getElementById("forum-toast");
     if (!t) return;
@@ -563,16 +610,14 @@ const Forum = (() => {
     }, 2200);
   }
 
-  // ── Login prompt ───────────────────────────────────────────
   function openLoginPrompt() {
     if (confirm("You need to sign in to do that. Go to login page?")) {
       window.location.href = "login.html";
     }
   }
 
-  // ── Create Post Modal ─────────────────────────────────────
   function openCreateModal() {
-    const session = Auth.getSession();
+    const session = window.Auth.getSession();
     if (!session) {
       openLoginPrompt();
       return;
@@ -581,13 +626,12 @@ const Forum = (() => {
     state.tags = [];
     state.imageDataUrl = null;
 
-    // Reset form
     const titleInput = document.getElementById("post-title-input");
     const textarea = document.getElementById("post-textarea");
     const preview = document.getElementById("image-preview");
     const upArea = document.getElementById("image-upload-area");
     const removeBtn = document.getElementById("remove-image-btn");
-    const tagsWrap = document.getElementById("tags-input-wrap");
+
     if (titleInput) titleInput.value = "";
     if (textarea) textarea.value = "";
     if (preview) {
@@ -597,23 +641,26 @@ const Forum = (() => {
     if (upArea) upArea.classList.remove("has-image");
     if (removeBtn) removeBtn.style.display = "none";
 
-    // Reset tag chips
     document.querySelectorAll(".tag-chip").forEach((c) => c.remove());
     const tagInput = document.getElementById("tag-input");
     if (tagInput) tagInput.value = "";
 
-    // Reset category selection
     state.selectedCategory = "general";
     document.querySelectorAll(".cat-select-btn").forEach((btn) => {
       btn.classList.toggle("selected", btn.dataset.cat === "general");
     });
 
-    // Set modal user display
     const userRow = document.getElementById("modal-user-row");
+    const myAvatar = localStorage.getItem("flixrate_profile_avatar");
     if (userRow) {
+      const avatarHtml = myAvatar
+        ? `<img src="${myAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : avatarLetter(session.username);
+      const avatarBg = myAvatar ? "transparent" : avatarColor(session.username);
+
       userRow.innerHTML = `
-        <div class="post-avatar" style="background:${avatarColor(session.username)};width:36px;height:36px;font-size:0.9rem">
-          ${avatarLetter(session.username)}
+        <div class="post-avatar" style="background:${avatarBg};width:36px;height:36px;font-size:0.9rem;padding:0;overflow:hidden;">
+          ${avatarHtml}
         </div>
         <div style="font-size:0.9rem;font-weight:700;color:var(--text-primary)">${esc(session.username)}</div>`;
     }
@@ -628,18 +675,25 @@ const Forum = (() => {
     document.body.style.overflow = "";
   }
 
-  function submitPost() {
-    const session = Auth.getSession();
+  async function submitPost() {
+    const session = window.Auth.getSession();
     if (!session) return;
+
     const title = document.getElementById("post-title-input")?.value.trim();
     const text = document.getElementById("post-textarea")?.value.trim();
+
     if (!title && !text && !state.imageDataUrl) {
       showToast("Please add some content first!");
       return;
     }
 
-    const post = {
-      id: uid(),
+    const btn = document.getElementById("post-submit-btn");
+    if (btn) {
+      btn.textContent = "Posting...";
+      btn.disabled = true;
+    }
+
+    const postData = {
       author: session.username,
       title: title || "",
       text: text || "",
@@ -651,28 +705,34 @@ const Forum = (() => {
       ts: Date.now(),
     };
 
-    const posts = getPosts();
-    posts.unshift(post);
-    savePosts(posts);
+    try {
+      await addDoc(collection(db, "forum_posts"), postData);
+      closeCreateModal();
+      state.activeCategory = "all";
+      await fetchPosts();
+      renderAll();
+      showToast("Post shared! 🎉");
+      document
+        .getElementById("post-feed")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (e) {
+      console.error("Failed to create post", e);
+      alert("Error posting. Please try again.");
+    }
 
-    closeCreateModal();
-    state.activeCategory = "all";
-    renderAll();
-    showToast("Post shared! 🎉");
-    // Scroll to top of feed
-    document
-      .getElementById("post-feed")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (btn) {
+      btn.textContent = "Share Post 🚀";
+      btn.disabled = false;
+    }
   }
 
-  // ── Image upload ───────────────────────────────────────────
   function handleImageUpload(file) {
     if (!file || !file.type.startsWith("image/")) {
       showToast("Please select an image file.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      showToast("Image must be under 5 MB.");
+    if (file.size > 700 * 1024) {
+      showToast("Image must be under 700KB.");
       return;
     }
 
@@ -707,7 +767,6 @@ const Forum = (() => {
     if (fileInput) fileInput.value = "";
   }
 
-  // ── Tags input ─────────────────────────────────────────────
   function addTag(value) {
     const tag = value.trim().replace(/^#/, "").toLowerCase();
     if (!tag || state.tags.includes(tag) || state.tags.length >= 5) return;
@@ -718,7 +777,7 @@ const Forum = (() => {
       const chip = document.createElement("span");
       chip.className = "tag-chip";
       chip.dataset.tag = tag;
-      chip.innerHTML = `#${esc(tag)} <button class="tag-chip-remove" onclick="Forum.removeTagChip('${esc(tag)}')">×</button>`;
+      chip.innerHTML = `#${esc(tag)} <button class="tag-chip-remove" onclick="window.Forum.removeTagChip('${esc(tag)}')">×</button>`;
       wrap.insertBefore(chip, input);
       input.value = "";
     }
@@ -729,7 +788,6 @@ const Forum = (() => {
     document.querySelector(`.tag-chip[data-tag="${tag}"]`)?.remove();
   }
 
-  // ── Render all ────────────────────────────────────────────
   function renderAll() {
     renderSidebar();
     renderFeed();
@@ -737,45 +795,49 @@ const Forum = (() => {
     renderOnlineUsers();
   }
 
-  // ── Init ───────────────────────────────────────────────────
-  function init() {
-    Auth.init();
+  async function init() {
+    if (window.Auth && typeof window.Auth.init === "function")
+      window.Auth.init();
+
+    await fetchPosts();
     renderAll();
 
-    // Sort tabs
     document.querySelectorAll(".sort-tab").forEach((btn) => {
       btn.addEventListener("click", () => setSort(btn.dataset.sort));
     });
 
-    // Forum search
     const searchInput = document.getElementById("forum-search-input");
     let debounce = null;
     searchInput?.addEventListener("input", () => {
       clearTimeout(debounce);
       debounce = setTimeout(() => doSearch(searchInput.value), 350);
     });
+    searchInput?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        clearTimeout(debounce);
+        doSearch(searchInput.value);
+      }
+    });
     document
       .getElementById("forum-search-btn")
       ?.addEventListener("click", () => {
+        clearTimeout(debounce);
         doSearch(searchInput?.value);
       });
 
-    // Create post button
     document
       .getElementById("btn-new-post")
       ?.addEventListener("click", openCreateModal);
     document
       .getElementById("modal-close-btn")
       ?.addEventListener("click", closeCreateModal);
-
-    // Close modal on backdrop click
     document
       .getElementById("create-post-modal")
       ?.addEventListener("click", (e) => {
         if (e.target.id === "create-post-modal") closeCreateModal();
       });
 
-    // Image upload
     const uploadArea = document.getElementById("image-upload-area");
     const fileInput = document.getElementById("image-file-input");
     uploadArea?.addEventListener("click", (e) => {
@@ -801,22 +863,19 @@ const Forum = (() => {
       .getElementById("remove-image-btn")
       ?.addEventListener("click", removeImage);
 
-    // Tags input
     const tagInput = document.getElementById("tag-input");
     tagInput?.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === ",") {
         e.preventDefault();
         addTag(tagInput.value);
       }
-      if (e.key === "Backspace" && !tagInput.value && state.tags.length) {
+      if (e.key === "Backspace" && !tagInput.value && state.tags.length)
         removeTagChip(state.tags[state.tags.length - 1]);
-      }
     });
     tagInput?.addEventListener("blur", () => {
       if (tagInput.value) addTag(tagInput.value);
     });
 
-    // Category selector
     document.querySelectorAll(".cat-select-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         document
@@ -827,12 +886,10 @@ const Forum = (() => {
       });
     });
 
-    // Submit
     document
       .getElementById("post-submit-btn")
       ?.addEventListener("click", submitPost);
 
-    // Textarea char count
     const textarea = document.getElementById("post-textarea");
     const charCount = document.getElementById("post-char-count");
     textarea?.addEventListener("input", () => {
@@ -841,20 +898,15 @@ const Forum = (() => {
         textarea.value = textarea.value.slice(0, 2000);
     });
 
-    // Lightbox
     document
       .getElementById("lightbox-close")
       ?.addEventListener("click", closeLightbox);
     document.getElementById("lightbox")?.addEventListener("click", (e) => {
       if (e.target.id === "lightbox") closeLightbox();
     });
-
-    // Close menus on outside click
     document.addEventListener("click", (e) => {
       if (!e.target.closest(".post-card-menu")) closeAllMenus();
     });
-
-    // Escape key
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         closeCreateModal();
@@ -884,5 +936,6 @@ const Forum = (() => {
   };
 })();
 
+// CRITICAL: Bind to window so HTML onClick attributes can access it!
+window.Forum = Forum;
 document.addEventListener("DOMContentLoaded", Forum.init);
-    

@@ -42,6 +42,14 @@
   to   { transform: translate(30px, 20px) scale(1.08); }
 }
 
+.login-card:focus-within {
+    border-color: rgba(124, 58, 237, 0.4);
+    box-shadow: 
+        0 0 0 1px rgba(255,255,255,0.04), 
+        0 30px 80px rgba(0,0,0,0.6), 
+        0 0 100px rgba(124,58,237,0.25); /* Stronger purple glow */
+}
+
 /* ── Logo ────────────────────────────────────────────────── */
 .login-logo {
   text-align: center;
@@ -108,7 +116,9 @@
 
 /* ── Forms ───────────────────────────────────────────────── */
 .login-form { display: flex; flex-direction: column; gap: 18px; }
+.login-form.form--active { display: flex; }
 .login-form:not(.form--active) { display: none; }
+
 
 .form-group { display: flex; flex-direction: column; gap: 7px; }
 
@@ -233,6 +243,34 @@
 .form-divider::before { left: 0; }
 .form-divider::after  { right: 0; }
 
+/* ── Divider ────────────────────────────── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 24px 0 20px 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* This creates the lines on the left and right */
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* This adds space between the lines and the "OR" */
+.auth-divider::before {
+  margin-right: 14px;
+}
+
+.auth-divider::after {
+  margin-left: 14px;
+}
+
 /* ── Back to home link ───────────────────────────────────── */
 .login-back {
   text-align: center;
@@ -246,3 +284,21 @@
   transition: color var(--transition-fast);
 }
 .login-back a:hover { color: white; }
+
+.btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 50px; /* 🟨 CHANGED: 50px makes it perfectly pill-shaped */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  margin-bottom: 20px;
+}
