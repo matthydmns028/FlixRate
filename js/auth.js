@@ -4,11 +4,11 @@
 // ============================================================
 
 const Auth = (() => {
-  const USERS_KEY = 'flixrate_users';
-  const SESSION_KEY = 'flixrate_session';
+  const USERS_KEY = "flixrate_users";
+  const SESSION_KEY = "flixrate_session";
 
   function getUsers() {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
   }
 
   function saveUsers(users) {
@@ -16,7 +16,7 @@ const Auth = (() => {
   }
 
   function getSession() {
-    return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    return JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
   }
 
   function saveSession(user) {
@@ -25,32 +25,56 @@ const Auth = (() => {
 
   function register(username, email, password) {
     const users = getUsers();
-    if (users.find(u => u.email === email)) {
-      return { success: false, message: 'Email already registered.' };
+    if (users.find((u) => u.email === email)) {
+      return { success: false, message: "Email already registered." };
     }
-    const user = { id: Date.now(), username, email, password, avatar: null, createdAt: new Date().toISOString() };
+    if (users.find((u) => u.username === username)) {
+      return { success: false, message: "Username already taken." };
+    }
+    const user = {
+      id: Date.now(),
+      username,
+      email,
+      password,
+      avatar: null,
+      createdAt: new Date().toISOString(),
+    };
     users.push(user);
     saveUsers(users);
-    saveSession({ id: user.id, username: user.username, email: user.email, avatar: user.avatar });
+    saveSession({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar,
+    });
     return { success: true, user };
   }
 
   function login(credential, password) {
     const users = getUsers();
     // Check if credential is an email (contains @) or a username
-    const isEmail = credential.includes('@');
+    const isEmail = credential.includes("@");
     let user;
-    
+
     if (isEmail) {
-      user = users.find(u => u.email === credential && u.password === password);
+      user = users.find(
+        (u) => u.email === credential && u.password === password,
+      );
     } else {
-      user = users.find(u => u.username === credential && u.password === password);
+      user = users.find(
+        (u) => u.username === credential && u.password === password,
+      );
     }
-    
+
     if (!user) {
-      return { success: false, message: 'Invalid email/username or password.' };
+      return { success: false, message: "Invalid email/username or password." };
     }
-    saveSession({ id: user.id, username: user.username, email: user.email, avatar: user.avatar });
+    saveSession({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar,
+    });
     return { success: true, user };
   }
 
@@ -61,10 +85,10 @@ const Auth = (() => {
 
   function confirmLogout() {
     // Inject modal once
-    if (!document.getElementById('logout-confirm-modal')) {
-      const modal = document.createElement('div');
-      modal.id = 'logout-confirm-modal';
-      modal.className = 'logout-modal-backdrop';
+    if (!document.getElementById("logout-confirm-modal")) {
+      const modal = document.createElement("div");
+      modal.id = "logout-confirm-modal";
+      modal.className = "logout-modal-backdrop";
       modal.innerHTML = `
         <div class="logout-modal-box">
           <div class="logout-modal-icon">👋</div>
@@ -75,16 +99,18 @@ const Auth = (() => {
             <button class="logout-btn-confirm" onclick="Auth.doLogout()">Sign Out</button>
           </div>
         </div>`;
-      modal.addEventListener('click', e => { if (e.target === modal) Auth.hideLogoutModal(); });
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) Auth.hideLogoutModal();
+      });
       document.body.appendChild(modal);
     }
-    document.getElementById('logout-confirm-modal').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    document.getElementById("logout-confirm-modal").classList.add("open");
+    document.body.style.overflow = "hidden";
   }
 
   function hideLogoutModal() {
-    document.getElementById('logout-confirm-modal')?.classList.remove('open');
-    document.body.style.overflow = '';
+    document.getElementById("logout-confirm-modal")?.classList.remove("open");
+    document.body.style.overflow = "";
   }
 
   function doLogout() {
@@ -99,7 +125,7 @@ const Auth = (() => {
 
   function updateNavbar() {
     const session = getSession();
-    const navUser = document.getElementById('nav-user-area');
+    const navUser = document.getElementById("nav-user-area");
     if (!navUser) return;
     if (session) {
       const avatarData = localStorage.getItem("flixrate_profile_avatar");
@@ -107,9 +133,10 @@ const Auth = (() => {
         <div class="nav-user-info">
           <a href="profile.html" class="nav-user-link" title="View profile">
             <div class="nav-avatar-wrap">
-              ${avatarData
-                ? `<img src="${avatarData}" alt="avatar" class="nav-avatar-img">`
-                : `<div class="nav-avatar-placeholder">${session.username.charAt(0).toUpperCase()}</div>`
+              ${
+                avatarData
+                  ? `<img src="${avatarData}" alt="avatar" class="nav-avatar-img">`
+                  : `<div class="nav-avatar-placeholder">${session.username.charAt(0).toUpperCase()}</div>`
               }
             </div>
             <div class="nav-user-text">
@@ -134,7 +161,28 @@ const Auth = (() => {
     updateNavbar();
   }
 
-  return { register, login, logout, confirmLogout, hideLogoutModal, doLogout, isLoggedIn, getSession, updateNavbar, init };
+  function updateSession(updates) {
+    let session = getSession();
+    if (session) {
+      session = { ...session, ...updates };
+      saveSession(session);
+      updateNavbar();
+    }
+  }
+
+  return {
+    register,
+    login,
+    logout,
+    confirmLogout,
+    hideLogoutModal,
+    doLogout,
+    isLoggedIn,
+    getSession,
+    updateSession,
+    updateNavbar,
+    init,
+  };
 })();
 
 window.Auth = Auth;

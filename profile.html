@@ -375,9 +375,20 @@
 
         
 
-        <!-- Display name -->
-        <div class="settings-section">
-          <div class="settings-section-label">Account Info</div>
+          <!-- Account Info -->
+          <div class="settings-section">
+            <div class="settings-section-label">Account Info</div>
+            <div class="settings-field">
+              <label class="settings-label" for="settings-username">Username</label>
+              <input
+                type="text"
+                class="settings-input"
+                id="settings-username"
+                placeholder="Choose a unique username"
+                maxlength="32"
+              />
+              <div id="settings-username-err" style="color:var(--accent);font-size:0.85rem;margin-top:6px;display:none;"></div>
+            </div>
           <div class="settings-field">
             <label class="settings-label" for="settings-display-name"
               >Display Name</label
