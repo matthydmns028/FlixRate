@@ -46,15 +46,16 @@
         <div id="search-results"></div>
       </div>
 
-      <ul class="nav-links">
+      <div class="nav-actions" id="nav-menu">
+        <ul class="nav-links">
         <li><a href="browse.html?type=movie">Movies</a></li>
         <li><a href="browse.html?type=anime">Anime</a></li>
         <li><a href="browse.html?type=tv">TV Series</a></li>
         <li><a href="forum.html">Forum</a></li>
         <li><a href="watchlist.html">🔖 Watchlist</a></li>
       </ul>
-
-      <div id="nav-user-area"></div>
+        <div id="nav-user-area"></div>
+      </div>
       <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -480,7 +481,7 @@
       // Mobile nav toggle
       document.getElementById("nav-toggle")?.addEventListener("click", () => {
         document
-          .querySelector(".nav-links")
+          .getElementById("nav-menu")
           ?.classList.toggle("nav-menu--open");
       });
     </script>

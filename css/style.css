@@ -923,18 +923,19 @@ textarea {
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .nav-links {
+  .nav-actions {
     display: none;
   }
   .nav-toggle {
     display: flex;
+    margin-left: auto;
   }
   .nav-search {
     max-width: 260px;
+    margin-right: 15px; /* optional spacing */
   }
 
-  .nav-menu--open + .nav-links,
-  .nav-links.nav-menu--open {
+  .nav-actions.nav-menu--open {
     display: flex;
     position: absolute;
     top: var(--nav-height);
@@ -943,8 +944,21 @@ textarea {
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
     flex-direction: column;
-    align-items: flex-start;
-    padding: 12px;
+    align-items: center;
+    padding: 20px;
+    gap: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  
+  .nav-actions.nav-menu--open .nav-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin: 0;
+  }
+  
+  .nav-actions.nav-menu--open #nav-user-area {
+    margin-top: 10px;
   }
 
   .row-prev,
