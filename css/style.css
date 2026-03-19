@@ -275,13 +275,27 @@ textarea {
   color: var(--text-secondary);
 }
 
+/* Navigation Actions (Desktop) */
+@media (min-width: 901px) {
+  .nav-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 24px;
+    margin-left: auto;
+    flex: 1;
+    height: 100%;
+  }
+}
+
 /* Nav links */
 .nav-links {
   display: flex;
   align-items: center;
   gap: 6px;
   list-style: none;
-  margin-left: auto;
+  margin: 0;
 }
 .nav-links a {
   font-size: 0.88rem;
