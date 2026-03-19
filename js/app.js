@@ -203,7 +203,7 @@ const App = (() => {
               img,
               title: a.title_english || a.title,
               rating: a.score,
-              type: "🎌 Anime",
+              type: '🌸 Anime',
               sub: a.year || "",
               id: a.mal_id,
               itemType: "anime",
@@ -231,7 +231,7 @@ const App = (() => {
               img,
               title: a.title_english || a.title,
               rating: a.score,
-              type: "🎌 Anime",
+              type: '🌸 Anime',
               sub: a.season ? `${a.season} ${a.year}` : "",
               id: a.mal_id,
               itemType: "anime",
@@ -301,7 +301,7 @@ const App = (() => {
         items.push({
           img: CONFIG.TMDB_IMG_W300 + r.poster_path,
           title: r.title || r.name,
-          type: r.media_type === "tv" ? "📺 Series" : "🎬 Movie",
+          type: r.media_type === 'tv' ? '📺 Series' : '🎬 Movie',
           id: r.id,
           itemType: r.media_type === "tv" ? "tv" : "movie",
         });
@@ -314,7 +314,7 @@ const App = (() => {
         items.push({
           img,
           title: a.title_english || a.title,
-          type: "🎌 Anime",
+          type: '🌸 Anime',
           id: a.mal_id,
           itemType: "anime",
         });

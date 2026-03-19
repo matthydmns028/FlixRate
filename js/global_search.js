@@ -55,7 +55,7 @@ const GlobalSearch = (() => {
         items.push({
           img: window.CONFIG.TMDB_IMG_W300 + r.poster_path,
           title: r.title || r.name,
-          type: r.media_type === 'tv' ? '?? Series' : '?? Movie',
+          type: r.media_type === 'tv' ? '📺 Series' : '🎬 Movie',
           id: r.id,
           itemType: r.media_type === 'tv' ? 'tv' : 'movie',
         });
@@ -68,7 +68,7 @@ const GlobalSearch = (() => {
         items.push({
           img,
           title: a.title_english || a.title,
-          type: '?? Anime',
+          type: '🌸 Anime',
           id: a.mal_id,
           itemType: 'anime',
         });
