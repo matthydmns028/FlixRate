@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Sign in or create your FlixRate account to rate movies, anime, and TV shows.">
   <title>Sign In – FlixRate</title>
+  <link rel="icon" type="image/png" href="img/Logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="css/style.css">
@@ -36,7 +37,7 @@
 
       <form class="login-form form--active" id="form-login"
         role="tabpanel" aria-labelledby="tab-login"
-        novalidate >
+        novalidate onsubmit="handleLogin(event)">
 
         <div class="form-group">
           <label class="form-label" for="login-email">Email or Username</label>
@@ -97,7 +98,7 @@
 
       <form class="login-form" id="form-register"
         role="tabpanel" aria-labelledby="tab-register"
-        novalidate >
+        novalidate onsubmit="handleRegister(event)">
 
         <div class="form-group">
           <label class="form-label" for="reg-username">Username</label>
@@ -182,7 +183,7 @@
         </button>
       </form>
 
-      <form class="login-form" id="form-reset" role="tabpanel" novalidate >
+      <form class="login-form" id="form-reset" role="tabpanel" novalidate onsubmit="handleResetPassword(event)">
         <h2 style="font-size: 1.2rem; margin-bottom: 16px; text-align: center;">Reset Password</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; text-align: center;">Enter your email and we'll send you a secure link to reset your password.</p>
         
