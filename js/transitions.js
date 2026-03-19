@@ -9,20 +9,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // 2. Find all the links on the page
   const links = document.querySelectorAll("a[href]");
 
-  links.forEach(link => {
+  links.forEach((link) => {
     // Only apply this to internal links (ignore external sites like YouTube)
-    if (link.hostname === window.location.hostname && !link.hash && link.target !== "_blank") {
-      
+    if (
+      link.hostname === window.location.hostname &&
+      !link.hash &&
+      link.target !== "_blank" &&
+      link.getAttribute("href") !== "#"
+    ) {
       // 🚀 THE PREFETCH TRICK: Download the page when they hover over the link!
-      link.addEventListener("mouseenter", () => {
-        const prefetchExists = document.querySelector(`link[href="${link.href}"]`);
-        if (!prefetchExists) {
-          const prefetch = document.createElement("link");
-          prefetch.rel = "prefetch";
-          prefetch.href = link.href;
-          document.head.appendChild(prefetch);
-        }
-      }, { once: true }); // Only do this once per link
+      link.addEventListener(
+        "mouseenter",
+        () => {
+          const prefetchExists = document.querySelector(
+            `link[href="${link.href}"]`,
+          );
+          if (!prefetchExists) {
+            const prefetch = document.createElement("link");
+            prefetch.rel = "prefetch";
+            prefetch.href = link.href;
+            document.head.appendChild(prefetch);
+          }
+        },
+        { once: true },
+      ); // Only do this once per link
 
       // 🎬 THE FADE OUT TRICK: Intercept the click
       link.addEventListener("click", (e) => {
@@ -39,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Wait for the CSS fade to finish (250ms), then actually change the page
         setTimeout(() => {
           window.location.href = targetUrl;
-        }, 250); 
+        }, 250);
       });
     }
   });

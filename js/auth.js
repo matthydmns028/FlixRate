@@ -170,10 +170,32 @@ const Auth = (() => {
     }
   }
 
+  // Firebase reset password
+  async function resetPassword(email) {
+    try {
+      const { sendPasswordResetEmail } =
+        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
+      const { auth } = await import("./firebase-init.js");
+
+      await sendPasswordResetEmail(auth, email);
+      return {
+        success: true,
+        message: "Check your inbox! A secure reset link has been sent.",
+      };
+    } catch (error) {
+      let msg = error.message;
+      if (error.code === "auth/user-not-found")
+        msg = "No user found with this email.";
+      if (error.code === "auth/invalid-email") msg = "Invalid email address.";
+      return { success: false, message: msg };
+    }
+  }
+
   return {
     register,
     login,
     logout,
+    resetPassword,
     confirmLogout,
     hideLogoutModal,
     doLogout,
