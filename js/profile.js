@@ -64,7 +64,7 @@ const Profile = (() => {
   let targetProfile = null;
 
   function getSettings() {
-    const prof = isOwnProfile ? window.cloudProfile : (targetProfile || {});
+    const prof = isOwnProfile ? window.cloudProfile : targetProfile || {};
     return {
       displayName: prof.displayName || viewedUsername,
       bio: prof.bio,
@@ -79,7 +79,9 @@ const Profile = (() => {
   }
 
   function getAvatar() {
-    return isOwnProfile ? window.cloudProfile.avatar : (targetProfile?.avatar || null);
+    return isOwnProfile
+      ? window.cloudProfile.avatar
+      : targetProfile?.avatar || null;
   }
   function saveAvatar(data) {
     window.cloudProfile.avatar = data;
@@ -91,7 +93,7 @@ const Profile = (() => {
   }
 
   function getHighlights() {
-    const prof = isOwnProfile ? window.cloudProfile : (targetProfile || {});
+    const prof = isOwnProfile ? window.cloudProfile : targetProfile || {};
     return prof.highlights || new Array(5).fill(null);
   }
   function saveHighlights(arr) {
@@ -111,7 +113,7 @@ const Profile = (() => {
   }
 
   function getWishlist() {
-    const prof = isOwnProfile ? window.cloudProfile : (targetProfile || {});
+    const prof = isOwnProfile ? window.cloudProfile : targetProfile || {};
     const wl = prof.watchlist || {};
     return Object.values(wl).sort(
       (a, b) => (b.addedAt || 0) - (a.addedAt || 0),
@@ -233,39 +235,45 @@ const Profile = (() => {
       document.querySelector(".avatar-edit-overlay")?.remove();
       document.getElementById("btn-edit-profile")?.remove();
       document.getElementById("btn-friends")?.remove();
-      document.getElementById("profile-avatar-container").style.cursor = 
+      document.getElementById("profile-avatar-container").style.cursor =
         "default";
 
-        // Check auth to see if we can follow
-        const mySession = window.Auth.getSession();
-        if (mySession && typeof window.Friends !== "undefined") {
-           const btnFollow = document.getElementById("btn-interact-profile");
-           const btnText = document.getElementById("btn-interact-text");
-           if (btnFollow) {
-             btnFollow.style.display = "flex";
-             // Get my own user doc to see if I follow this person
-                                 getDoc(doc(db, "users", mySession.id.toString())).then((snap) => {
-                      if (snap.exists()) {
-                        const myData = snap.data();
-                        const iFollow = (myData.following || []).includes(viewedUsername);
-                        if (iFollow) {
-                          btnFollow.classList.add("following");
-                          btnText.textContent = "Unfollow";
-                        } else {
-                          btnFollow.classList.remove("following");
-                          btnText.textContent = "Follow";
-                        }
-                      }
-                    });
-             btnFollow.onclick = () => {
-                if (btnFollow.classList.contains("following")) {
-                   window.Friends.unfollow(viewedUsername).then(() => { btnFollow.classList.remove("following"); btnText.textContent = "Follow"; });
-                } else {
-                   window.Friends.follow(viewedUsername).then(() => { btnFollow.classList.add("following"); btnText.textContent = "Unfollow"; });
-                }
-             };
-           }
+      // Check auth to see if we can follow
+      const mySession = window.Auth.getSession();
+      if (mySession && typeof window.Friends !== "undefined") {
+        const btnFollow = document.getElementById("btn-interact-profile");
+        const btnText = document.getElementById("btn-interact-text");
+        if (btnFollow) {
+          btnFollow.style.display = "flex";
+          // Get my own user doc to see if I follow this person
+          getDoc(doc(db, "users", mySession.id.toString())).then((snap) => {
+            if (snap.exists()) {
+              const myData = snap.data();
+              const iFollow = (myData.following || []).includes(viewedUsername);
+              if (iFollow) {
+                btnFollow.classList.add("following");
+                btnText.textContent = "Unfollow";
+              } else {
+                btnFollow.classList.remove("following");
+                btnText.textContent = "Follow";
+              }
+            }
+          });
+          btnFollow.onclick = () => {
+            if (btnFollow.classList.contains("following")) {
+              window.Friends.unfollow(viewedUsername).then(() => {
+                btnFollow.classList.remove("following");
+                btnText.textContent = "Follow";
+              });
+            } else {
+              window.Friends.follow(viewedUsername).then(() => {
+                btnFollow.classList.add("following");
+                btnText.textContent = "Unfollow";
+              });
+            }
+          };
         }
+      }
 
       const title = document.querySelector(".profile-card-title");
       if (title)
@@ -761,7 +769,14 @@ const Profile = (() => {
         const userRef = doc(db, "users", session.id.toString());
         const snap = await getDoc(userRef);
         if (snap.exists()) {
-          window.cloudProfile = { ...window.cloudProfile, ...snap.data() };
+          const data = snap.data();
+          window.cloudProfile = { ...window.cloudProfile, ...data };
+          if (data.username && data.username !== session.username) {
+            window.Auth.updateSession({ username: data.username });
+            if (isOwnProfile) {
+              viewedUsername = data.username;
+            }
+          }
         } else {
           window.cloudProfile.username = session.username;
           window.cloudProfile.displayName = session.username;
@@ -957,9 +972,3 @@ if (typeof window.API !== "undefined") {
 }
 
 document.addEventListener("DOMContentLoaded", window.Profile.init);
-
-
-
-
-
-

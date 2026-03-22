@@ -175,6 +175,14 @@ const Auth = (() => {
     if (session) {
       session = { ...session, ...updates };
       saveSession(session);
+
+      const users = getUsers();
+      const uIndex = users.findIndex((u) => u.id === session.id);
+      if (uIndex !== -1) {
+        users[uIndex] = { ...users[uIndex], ...updates };
+        saveUsers(users);
+      }
+
       updateNavbar();
     }
   }
