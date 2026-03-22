@@ -1,17 +1,17 @@
-// ============================================================
-// FlixRate – Detail Page Module (FIREBASE VERSION)
+﻿// ============================================================
+// FlixRate â€“ Detail Page Module (FIREBASE VERSION)
 // ============================================================
 
-import { auth, db } from './firebase-init.js';
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc, 
+import { auth, db } from "./firebase-init.js";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
   increment,
   collection,
   addDoc,
-  getDocs
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const Detail = (() => {
@@ -25,13 +25,14 @@ const Detail = (() => {
   let userStarSel = 0;
   let trailerKey = null;
   let currentComments = []; // Stores the live cloud comments
+  let userAvatars = {};
   const COMMENT_MAX = 500;
 
   function itemKey() {
     return `${TYPE}_${ID}`;
   }
 
-  // ── Local Like Storage (prevents spamming likes) ────────────
+  // â”€â”€ Local Like Storage (prevents spamming likes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function getLikes() {
     return JSON.parse(localStorage.getItem(LIKES_KEY) || "{}");
   }
@@ -42,7 +43,7 @@ const Detail = (() => {
     return likes[commentId];
   }
 
-  // ── Fetch data depending on type ──────────────────────────
+  // â”€â”€ Fetch data depending on type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function fetchItem() {
     if (TYPE === "anime") {
       const data = await API.fetchAnimeById(ID);
@@ -55,18 +56,30 @@ const Detail = (() => {
       };
       const base = CONFIG.TMDB_BASE;
       const [detail, credits, videos] = await Promise.all([
-        fetch(`${base}${endpoint}?language=en-US`, { headers }).then((r) => r.json()),
-        fetch(`${base}${endpoint}/credits?language=en-US`, { headers }).then((r) => r.json()),
-        fetch(`${base}${endpoint}/videos?language=en-US`, { headers }).then((r) => r.json()),
+        fetch(`${base}${endpoint}?language=en-US`, { headers }).then((r) =>
+          r.json(),
+        ),
+        fetch(`${base}${endpoint}/credits?language=en-US`, { headers }).then(
+          (r) => r.json(),
+        ),
+        fetch(`${base}${endpoint}/videos?language=en-US`, { headers }).then(
+          (r) => r.json(),
+        ),
       ]);
-      if (detail.success === false) throw new Error(detail.status_message || "Not found");
+      if (detail.success === false)
+        throw new Error(detail.status_message || "Not found");
       return normalizeTMDB(detail, credits, videos, TYPE);
     }
   }
 
   function normalizeTMDB(d, credits, videos, type) {
-    const trailer = (videos.results || []).find((v) => v.type === "Trailer" && v.site === "YouTube");
-    const cast = (credits.cast || []).slice(0, 8).map((c) => c.name).join(", ");
+    const trailer = (videos.results || []).find(
+      (v) => v.type === "Trailer" && v.site === "YouTube",
+    );
+    const cast = (credits.cast || [])
+      .slice(0, 8)
+      .map((c) => c.name)
+      .join(", ");
     const director = (credits.crew || []).find((c) => c.job === "Director");
     return {
       id: d.id,
@@ -74,7 +87,9 @@ const Detail = (() => {
       title: d.title || d.name,
       tagline: d.tagline || "",
       overview: d.overview || "",
-      backdrop: d.backdrop_path ? CONFIG.TMDB_IMG_ORIGINAL + d.backdrop_path : null,
+      backdrop: d.backdrop_path
+        ? CONFIG.TMDB_IMG_ORIGINAL + d.backdrop_path
+        : null,
       poster: d.poster_path ? CONFIG.TMDB_IMG_W500 + d.poster_path : null,
       rating: API.getLocalRating(type, d.id).rating,
       votes: API.getLocalRating(type, d.id).votes,
@@ -84,7 +99,7 @@ const Detail = (() => {
       language: d.original_language?.toUpperCase(),
       status: d.status,
       cast,
-      director: director?.name || "—",
+      director: director?.name || "â€”",
       trailerKey: trailer?.key || null,
       homepage: d.homepage || null,
     };
@@ -106,20 +121,28 @@ const Detail = (() => {
       year: a.year,
       language: "JP",
       status: a.status,
-      cast: (a.producers || []).map((p) => p.name).slice(0, 4).join(", "),
-      director: (a.studios || []).map((s) => s.name).slice(0, 2).join(", ") || "—",
+      cast: (a.producers || [])
+        .map((p) => p.name)
+        .slice(0, 4)
+        .join(", "),
+      director:
+        (a.studios || [])
+          .map((s) => s.name)
+          .slice(0, 2)
+          .join(", ") || "â€”",
       trailerKey: a.trailer?.youtube_id || null,
       homepage: a.url || null,
       episodes: a.episodes,
     };
   }
 
-  // ── Render page ────────────────────────────────────────────
+  // â”€â”€ Render page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function render(item) {
-    document.title = `${item.title} – FlixRate`;
+    document.title = `${item.title} â€“ FlixRate`;
 
     if (item.backdrop) {
-      document.getElementById("detail-backdrop").style.backgroundImage = `url("${item.backdrop}")`;
+      document.getElementById("detail-backdrop").style.backgroundImage =
+        `url("${item.backdrop}")`;
     }
     const posterEl = document.getElementById("detail-poster");
     if (posterEl) {
@@ -129,24 +152,43 @@ const Detail = (() => {
 
     const badgesEl = document.getElementById("detail-badges");
     if (badgesEl) {
-      const typeLabel = item.type === "anime" ? "🎌 Anime" : item.type === "tv" ? "📺 Series" : "🎬 Movie";
-      const genreBadges = item.genres.slice(0, 4).map((g) => `<span class="detail-badge detail-badge--genre">${g}</span>`).join("");
+      const typeLabel =
+        item.type === "anime"
+          ? "ðŸŽŒ Anime"
+          : item.type === "tv"
+            ? "ðŸ“º Series"
+            : "ðŸŽ¬ Movie";
+      const genreBadges = item.genres
+        .slice(0, 4)
+        .map(
+          (g) => `<span class="detail-badge detail-badge--genre">${g}</span>`,
+        )
+        .join("");
       badgesEl.innerHTML = `<span class="detail-badge detail-badge--type">${typeLabel}</span>${genreBadges}`;
     }
 
     setEl("detail-title", item.title);
     setEl("detail-tagline", item.tagline);
-    document.getElementById("detail-tagline").style.display = item.tagline ? "block" : "none";
+    document.getElementById("detail-tagline").style.display = item.tagline
+      ? "block"
+      : "none";
 
     const meta = document.getElementById("detail-meta-row");
     if (meta) {
       meta.innerHTML = [
-        item.year && `<span class="detail-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg><strong>${item.year}</strong></span>`,
-        item.runtime && `<span class="detail-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><strong>${item.runtime} min</strong></span>`,
-        item.episodes && `<span class="detail-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><strong>${item.episodes} eps</strong></span>`,
-        item.language && `<span class="detail-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><strong>${item.language}</strong></span>`,
-        item.status && `<span class="detail-meta-item"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg><strong>${item.status}</strong></span>`,
-      ].filter(Boolean).join("");
+        item.year &&
+          `<span class="detail-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg><strong>${item.year}</strong></span>`,
+        item.runtime &&
+          `<span class="detail-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><strong>${item.runtime} min</strong></span>`,
+        item.episodes &&
+          `<span class="detail-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><strong>${item.episodes} eps</strong></span>`,
+        item.language &&
+          `<span class="detail-meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><strong>${item.language}</strong></span>`,
+        item.status &&
+          `<span class="detail-meta-item"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg><strong>${item.status}</strong></span>`,
+      ]
+        .filter(Boolean)
+        .join("");
     }
 
     setEl("detail-overview", item.overview || "No overview available.");
@@ -155,11 +197,27 @@ const Detail = (() => {
     if (infoList) {
       infoList.innerHTML = [
         ["Director / Studio", item.director],
-        ["Cast", item.cast ? item.cast.slice(0, 80) + (item.cast.length > 80 ? "…" : "") : "—"],
-        ["Status", item.status || "—"],
-        ["Original Language", item.language || "—"],
-        item.homepage ? ["Official Site", `<a href="${item.homepage}" target="_blank" rel="noopener" style="color:var(--accent-light)">Visit ↗</a>`] : null,
-      ].filter(Boolean).map(([k, v]) => `<div class="info-row"><span class="info-key">${k}</span><span class="info-val">${v}</span></div>`).join("");
+        [
+          "Cast",
+          item.cast
+            ? item.cast.slice(0, 80) + (item.cast.length > 80 ? "â€¦" : "")
+            : "â€”",
+        ],
+        ["Status", item.status || "â€”"],
+        ["Original Language", item.language || "â€”"],
+        item.homepage
+          ? [
+              "Official Site",
+              `<a href="${item.homepage}" target="_blank" rel="noopener" style="color:var(--accent-light)">Visit â†—</a>`,
+            ]
+          : null,
+      ]
+        .filter(Boolean)
+        .map(
+          ([k, v]) =>
+            `<div class="info-row"><span class="info-key">${k}</span><span class="info-val">${v}</span></div>`,
+        )
+        .join("");
     }
 
     trailerKey = item.trailerKey;
@@ -168,8 +226,12 @@ const Detail = (() => {
       if (trailerKey) {
         trailerBtn.onclick = () => loadTrailerEmbed(trailerKey);
       } else {
-        trailerBtn.textContent = "🔍 Search Trailer";
-        trailerBtn.onclick = () => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(item.title + " trailer")}`, "_blank");
+        trailerBtn.textContent = "ðŸ” Search Trailer";
+        trailerBtn.onclick = () =>
+          window.open(
+            `https://www.youtube.com/results?search_query=${encodeURIComponent(item.title + " trailer")}`,
+            "_blank",
+          );
       }
     }
 
@@ -213,14 +275,20 @@ const Detail = (() => {
         btn.style.background = `linear-gradient(135deg, ${color.css}, ${ColorExtractor.toRgbaString(light, 1)})`;
         btn.style.boxShadow = `0 0 28px ${ColorExtractor.toRgbaString(color, 0.5)}, 0 4px 15px ${ColorExtractor.toRgbaString(color, 0.3)}`;
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
   }
 
-  // ── Firestore Ratings ────────────────────────────────────────────────
-  
+  // â”€â”€ Firestore Ratings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
   async function renderGlobalRating() {
     const key = itemKey();
-    let cloudRatings = { total: 0, count: 0, dist: { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 } };
+    let cloudRatings = {
+      total: 0,
+      count: 0,
+      dist: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+    };
 
     try {
       const docRef = doc(db, "global_ratings", key);
@@ -239,10 +307,10 @@ const Detail = (() => {
     const apiScoreOutOf5 = apiScoreOutOf10 / 2;
     const totalVotes = apiVotes + cloudRatings.count;
     let combined = 0;
-    
+
     if (totalVotes > 0) {
       const apiTotalPoints = apiScoreOutOf5 * apiVotes;
-      const cloudTotalPoints = cloudRatings.total; 
+      const cloudTotalPoints = cloudRatings.total;
       combined = (apiTotalPoints + cloudTotalPoints) / totalVotes;
     }
 
@@ -260,7 +328,9 @@ const Detail = (() => {
 
     const session = window.Auth.getSession();
     if (session) {
-      const userRatings = JSON.parse(localStorage.getItem(`flixrate_ratings_${session.username}`) || "{}");
+      const userRatings = JSON.parse(
+        localStorage.getItem(`flixrate_ratings_${session.username}`) || "{}",
+      );
       const userVoteObj = userRatings[key];
       const removeBtn = document.getElementById("vote-remove-btn");
 
@@ -272,7 +342,7 @@ const Detail = (() => {
         });
         const thanks = document.getElementById("vote-thanks");
         if (thanks) {
-          thanks.textContent = `You rated this ${userStarSel}/5 ★`;
+          thanks.textContent = `You rated this ${userStarSel}/5 â˜…`;
           thanks.classList.add("visible");
         }
         const submitBtn = document.getElementById("vote-submit-btn");
@@ -288,7 +358,8 @@ const Detail = (() => {
     const bars = document.getElementById("rating-bars");
     if (!bars) return;
     const total = Object.values(dist).reduce((s, v) => s + v, 0);
-    bars.innerHTML = [5, 4, 3, 2, 1].map((star) => {
+    bars.innerHTML = [5, 4, 3, 2, 1]
+      .map((star) => {
         const count = dist[star] || 0;
         const pct = total > 0 ? Math.round((count / total) * 100) : 0;
         return `<div class="rating-bar-row">
@@ -298,7 +369,8 @@ const Detail = (() => {
         </div>
         <span class="rating-bar-pct">${count}</span>
       </div>`;
-      }).join("");
+      })
+      .join("");
   }
 
   function starsHtml(ratingVal) {
@@ -306,7 +378,7 @@ const Detail = (() => {
     const full = Math.floor(normalizedRating);
     const half = normalizedRating - full >= 0.4 ? 1 : 0;
     const empty = 5 - full - half;
-    return "★".repeat(full) + (half ? "⯨" : "") + "☆".repeat(empty);
+    return "â˜…".repeat(full) + (half ? "â¯¨" : "") + "â˜†".repeat(empty);
   }
 
   function formatNum(n) {
@@ -361,14 +433,17 @@ const Detail = (() => {
     if (userStarSel === prevVote) {
       const thanks = document.getElementById("vote-thanks");
       if (thanks) {
-        thanks.textContent = `You already rated this ${userStarSel}/5 ★`;
+        thanks.textContent = `You already rated this ${userStarSel}/5 â˜…`;
         thanks.classList.add("visible");
       }
-      return; 
+      return;
     }
 
     const btn = document.getElementById("vote-submit-btn");
-    if (btn) { btn.textContent = "Saving..."; btn.disabled = true; }
+    if (btn) {
+      btn.textContent = "Saving...";
+      btn.disabled = true;
+    }
 
     try {
       const docRef = doc(db, "global_ratings", key);
@@ -378,16 +453,16 @@ const Detail = (() => {
         await setDoc(docRef, {
           total: 0,
           count: 0,
-          dist: { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
+          dist: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
         });
       }
 
       const updates = {
         total: increment(userStarSel - prevVote),
         count: increment(prevVote ? 0 : 1),
-        [`dist.${userStarSel}`]: increment(1)
+        [`dist.${userStarSel}`]: increment(1),
       };
-      
+
       if (prevVote && prevVote !== userStarSel) {
         updates[`dist.${prevVote}`] = increment(-1);
       }
@@ -404,21 +479,26 @@ const Detail = (() => {
 
       const thanks = document.getElementById("vote-thanks");
       if (thanks) {
-        thanks.textContent = `You rated this ${userStarSel}/5 ★`;
+        thanks.textContent = `You rated this ${userStarSel}/5 â˜…`;
         thanks.classList.add("visible");
       }
-      
-      if (btn) { btn.textContent = "Update Rating"; btn.disabled = false; }
-      
+
+      if (btn) {
+        btn.textContent = "Update Rating";
+        btn.disabled = false;
+      }
+
       const removeBtn = document.getElementById("vote-remove-btn");
       if (removeBtn) removeBtn.style.display = "block";
 
       await renderGlobalRating();
-
     } catch (error) {
       console.error("Error saving rating:", error);
       alert("Failed to save rating to the cloud.");
-      if (btn) { btn.textContent = "Submit Rating"; btn.disabled = false; }
+      if (btn) {
+        btn.textContent = "Submit Rating";
+        btn.disabled = false;
+      }
     }
   }
 
@@ -435,7 +515,10 @@ const Detail = (() => {
     const prevVote = prevVoteObj.val;
 
     const removeBtn = document.getElementById("vote-remove-btn");
-    if (removeBtn) { removeBtn.textContent = "Removing..."; removeBtn.disabled = true; }
+    if (removeBtn) {
+      removeBtn.textContent = "Removing...";
+      removeBtn.disabled = true;
+    }
 
     try {
       const docRef = doc(db, "global_ratings", key);
@@ -445,7 +528,7 @@ const Detail = (() => {
         const updates = {
           total: increment(-prevVote),
           count: increment(-1),
-          [`dist.${prevVote}`]: increment(-1)
+          [`dist.${prevVote}`]: increment(-1),
         };
         await updateDoc(docRef, updates);
       }
@@ -455,7 +538,7 @@ const Detail = (() => {
 
       userStarSel = 0;
       const stars = document.querySelectorAll(".star-pick-btn");
-      stars.forEach(btn => btn.classList.remove("selected", "hovered"));
+      stars.forEach((btn) => btn.classList.remove("selected", "hovered"));
 
       const thanks = document.getElementById("vote-thanks");
       if (thanks) thanks.classList.remove("visible");
@@ -473,11 +556,14 @@ const Detail = (() => {
     } catch (error) {
       console.error("Error removing rating:", error);
       alert("Failed to remove rating from the cloud.");
-      if (removeBtn) { removeBtn.textContent = "Delete Rating"; removeBtn.disabled = false; }
+      if (removeBtn) {
+        removeBtn.textContent = "Delete Rating";
+        removeBtn.disabled = false;
+      }
     }
   }
 
-  // ── FIREBASE COMMENTS ───────────────────────────────────────────────
+  // â”€â”€ FIREBASE COMMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let commentsShown = 8;
   let commentFilter = "newest";
 
@@ -509,7 +595,9 @@ const Detail = (() => {
 
     document.querySelectorAll(".comment-filter-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".comment-filter-btn").forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll(".comment-filter-btn")
+          .forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         commentFilter = btn.dataset.filter;
         commentsShown = 8;
@@ -517,7 +605,9 @@ const Detail = (() => {
       });
     });
 
-    document.getElementById("comments-load-more")?.addEventListener("click", () => {
+    document
+      .getElementById("comments-load-more")
+      ?.addEventListener("click", () => {
         commentsShown += 8;
         renderComments();
       });
@@ -530,7 +620,14 @@ const Detail = (() => {
     try {
       const ref = collection(db, `comments/${itemKey()}/list`);
       const snap = await getDocs(ref);
-      currentComments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      currentComments = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      try {
+        const usersSnap = await getDocs(collection(db, "users"));
+        usersSnap.docs.forEach(d => {
+          const data = d.data();
+          if (data.username && data.avatar) userAvatars[data.username] = data.avatar;
+        });
+      } catch (err) { console.error("Failed to fetch user avatars", err); }
       renderComments();
     } catch (e) {
       console.error("Failed to load comments", e);
@@ -550,7 +647,10 @@ const Detail = (() => {
     if (!text || text.length < 2) return;
 
     const btn = document.getElementById("comment-submit-btn");
-    if (btn) { btn.textContent = "Posting..."; btn.disabled = true; }
+    if (btn) {
+      btn.textContent = "Posting...";
+      btn.disabled = true;
+    }
 
     const comment = {
       author: session.username,
@@ -564,21 +664,26 @@ const Detail = (() => {
     try {
       const ref = collection(db, `comments/${itemKey()}/list`);
       await addDoc(ref, comment); // Push to Firestore
-      
+
       if (textarea) textarea.value = "";
       const charCount = document.getElementById("comment-char-count");
       if (charCount) charCount.textContent = `0/${COMMENT_MAX}`;
-      
+
       commentsShown = 8;
       await fetchCloudComments(); // Refresh the comment list
 
-      document.getElementById("comments-list")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      document
+        .getElementById("comments-list")
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     } catch (e) {
       console.error("Failed to post comment", e);
       alert("Could not post comment. Please try again.");
     }
 
-    if (btn) { btn.textContent = "Post Comment"; btn.disabled = false; }
+    if (btn) {
+      btn.textContent = "Post Comment";
+      btn.disabled = false;
+    }
   }
 
   function renderComments() {
@@ -598,11 +703,13 @@ const Detail = (() => {
       sortedComments.sort((a, b) => (b.ts || 0) - (a.ts || 0));
     }
 
-    if (countEl) countEl.textContent = `${sortedComments.length} comment${sortedComments.length !== 1 ? "s" : ""}`;
+    if (countEl)
+      countEl.textContent = `${sortedComments.length} comment${sortedComments.length !== 1 ? "s" : ""}`;
 
     const loadMoreBtn = document.getElementById("comments-load-more");
     if (loadMoreBtn) {
-      loadMoreBtn.style.display = sortedComments.length > commentsShown ? "block" : "none";
+      loadMoreBtn.style.display =
+        sortedComments.length > commentsShown ? "block" : "none";
     }
 
     if (sortedComments.length === 0) {
@@ -619,17 +726,20 @@ const Detail = (() => {
     list.innerHTML = visible
       .map((c) => {
         const hue = (c.userId || c.author.charCodeAt(0)) % 360;
-        const dateStr = timeAgo(c.ts);
-        const liked = likes[c.id] || false;
-        const starStr = c.rating ? "★".repeat(c.rating) + "☆".repeat(5 - c.rating) : ""; // Fixed to 5 stars!
-        return `
-        <div class="comment-card" id="cc-${c.id}">
-          <div class="comment-card-header">
-            <div class="comment-card-avatar" style="background:linear-gradient(135deg,hsl(${hue},70%,45%),hsl(${(hue + 60) % 360},70%,55%))">
-              ${c.author.charAt(0).toUpperCase()}
-            </div>
+          const dateStr = timeAgo(c.ts);
+          const liked = likes[c.id] || false;
+          const starStr = c.rating ? "★".repeat(c.rating) + "☆".repeat(5 - c.rating) : "";
+          const userDisplayAvatar = userAvatars[c.author];
+          const avatarHtml = userDisplayAvatar ? `<img src="${userDisplayAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : c.author.charAt(0).toUpperCase();
+          const avatarBg = userDisplayAvatar ? "transparent" : `linear-gradient(135deg,hsl(${hue},70%,45%),hsl(${(hue + 60) % 360},70%,55%))`;
+          return `
+          <div class="comment-card" id="cc-${c.id}">
+            <div class="comment-card-header">
+              <div class="comment-card-avatar" style="background:${avatarBg}; cursor:pointer; padding:0; overflow:hidden;" onclick="window.location.href='profile.html?u=${encodeURIComponent(c.author)}'" title="${escHtml(c.author)}">
+                ${avatarHtml}
+              </div>
             <div class="comment-card-meta">
-              <div class="comment-card-name">${escHtml(c.author)}</div>
+              <div class="comment-card-name"><span style="cursor:pointer;" onclick="window.location.href='profile.html?u=${encodeURIComponent(c.author)}'" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${escHtml(c.author)}</span></div>
               <div class="comment-card-time">${dateStr}</div>
             </div>
             ${starStr ? `<div class="comment-card-stars" title="${c.rating}/5">${starStr}</div>` : ""}
@@ -646,12 +756,17 @@ const Detail = (() => {
             </button>
           </div>
         </div>`;
-      }).join("");
+      })
+      .join("");
   }
 
   function escHtml(str) {
     if (!str) return "";
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
   function timeAgo(ts) {
@@ -667,21 +782,21 @@ const Detail = (() => {
 
   async function likeComment(id) {
     const isLiked = toggleLike(id);
-    
+
     // Update the UI immediately so it feels fast
     const btn = document.querySelector(`#cc-${id} .comment-action-btn`);
     if (btn) btn.classList.toggle("liked", isLiked);
-    
+
     try {
       const ref = doc(db, `comments/${itemKey()}/list`, id);
       await updateDoc(ref, {
-        likes: increment(isLiked ? 1 : -1)
+        likes: increment(isLiked ? 1 : -1),
       });
       await fetchCloudComments(); // Pull fresh data to update the counts perfectly
     } catch (e) {
       console.error("Failed to like comment", e);
       // Revert if it failed
-      toggleLike(id); 
+      toggleLike(id);
     }
   }
 
@@ -694,7 +809,7 @@ const Detail = (() => {
     textarea.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  // ── Misc Video & UI Handlers ──────────────────────────────
+  // â”€â”€ Misc Video & UI Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function loadTrailerEmbed(key) {
     key = key || trailerKey;
     if (!key) return;
@@ -702,6 +817,11 @@ const Detail = (() => {
     if (!container) return;
     container.innerHTML = `<iframe src="https://www.youtube.com/embed/${key}?autoplay=1&rel=0" 
       allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+
+    const embedSection = document.querySelector(".detail-trailer-embed");
+    if (embedSection) {
+      embedSection.scrollIntoView({ behavior: "smooth" });
+    }
   }
 
   function getWishlistStore() {
@@ -723,16 +843,17 @@ const Detail = (() => {
       // Fetch user's current cloud watchlist
       const userRef = doc(db, "users", String(session.id));
       const snap = await getDoc(userRef);
-      let WL = snap.exists() && snap.data().watchlist ? snap.data().watchlist : {};
+      let WL =
+        snap.exists() && snap.data().watchlist ? snap.data().watchlist : {};
 
       if (WL[key]) {
         // Remove from Watchlist
         delete WL[key];
         await setDoc(userRef, { watchlist: WL }, { merge: true });
-        
+
         // Update Local Storage backup (for the context menu / quick checks)
         localStorage.setItem("flixrate_wishlist", JSON.stringify(WL));
-        
+
         if (btn) {
           btn.classList.remove("btn-ghost--active");
           btn.querySelector("span").textContent = "Add to List";
@@ -749,20 +870,20 @@ const Detail = (() => {
           addedAt: Date.now(),
         };
         await setDoc(userRef, { watchlist: WL }, { merge: true });
-        
+
         // Update Local Storage backup
         localStorage.setItem("flixrate_wishlist", JSON.stringify(WL));
-        
+
         if (btn) {
           btn.classList.add("btn-ghost--active");
-          btn.querySelector("span").textContent = "In Watchlist ✓";
+          btn.querySelector("span").textContent = "In Watchlist âœ“";
         }
       }
     } catch (e) {
       console.error("Failed to update cloud watchlist", e);
       alert("Failed to update watchlist. Please try again.");
     }
-    
+
     if (btn) btn.disabled = false;
   }
 
@@ -771,7 +892,8 @@ const Detail = (() => {
     card.className = "similar-anime-card";
     card.setAttribute("role", "button");
     card.setAttribute("tabindex", "0");
-    const img = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url;
+    const img =
+      anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url;
     const rating = anime.score ? parseFloat(anime.score).toFixed(1) : "N/A";
 
     card.dataset.ctxId = anime.mal_id;
@@ -792,7 +914,7 @@ const Detail = (() => {
       </div>
       <div class="similar-anime-card-info">
         <div class="similar-anime-card-title">${anime.title_english || anime.title}</div>
-        <div class="similar-anime-card-rating">★ ${rating}</div>
+        <div class="similar-anime-card-rating">â˜… ${rating}</div>
       </div>`;
 
     const detailUrl = `detail.html?type=anime&id=${anime.mal_id}`;
@@ -802,10 +924,10 @@ const Detail = (() => {
     });
 
     return card;
-  }   
+  }
 
   async function renderSimilarAnime() {
-    if (TYPE !== "anime" || !currentItem) return; 
+    if (TYPE !== "anime" || !currentItem) return;
 
     const section = document.getElementById("similar-anime-section");
     const track = document.getElementById("similar-anime-track");
@@ -855,20 +977,21 @@ const Detail = (() => {
     });
   }
 
-  // ── Init ───────────────────────────────────────────────────
+  // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function init() {
     if (!ID) {
       document.getElementById("detail-error").style.display = "block";
       return;
     }
 
-    if(window.Auth && typeof window.Auth.init === 'function') window.Auth.init();
+    if (window.Auth && typeof window.Auth.init === "function")
+      window.Auth.init();
 
     const WL = JSON.parse(localStorage.getItem("flixrate_wishlist") || "{}");
     const btn = document.getElementById("btn-wishlist");
     if (btn && WL[itemKey()]) {
       btn.classList.add("btn-ghost--active");
-      btn.querySelector("span").textContent = "In Watchlist ✓";
+      btn.querySelector("span").textContent = "In Watchlist âœ“";
     }
 
     try {
@@ -889,10 +1012,18 @@ const Detail = (() => {
     await initComments();
     renderSimilarAnime();
 
-    document.getElementById("vote-submit-btn")?.addEventListener("click", submitVote);
-    document.getElementById("vote-remove-btn")?.addEventListener("click", removeVote);
-    document.getElementById("btn-wishlist")?.addEventListener("click", toggleWishlist);
-    document.getElementById("detail-trailer-btn")?.addEventListener("click", () => loadTrailerEmbed());
+    document
+      .getElementById("vote-submit-btn")
+      ?.addEventListener("click", submitVote);
+    document
+      .getElementById("vote-remove-btn")
+      ?.addEventListener("click", removeVote);
+    document
+      .getElementById("btn-wishlist")
+      ?.addEventListener("click", toggleWishlist);
+    document
+      .getElementById("detail-trailer-btn")
+      ?.addEventListener("click", () => loadTrailerEmbed());
   }
 
   return {
@@ -907,3 +1038,9 @@ const Detail = (() => {
 window.Detail = Detail;
 
 document.addEventListener("DOMContentLoaded", Detail.init);
+
+
+
+
+
+

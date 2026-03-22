@@ -61,12 +61,14 @@ const Profile = (() => {
   // 🟨 State to determine if we are viewing our own profile or someone else's
   let isOwnProfile = true;
   let viewedUsername = "";
+  let targetProfile = null;
 
   function getSettings() {
+    const prof = isOwnProfile ? window.cloudProfile : (targetProfile || {});
     return {
-      displayName: window.cloudProfile.displayName,
-      bio: window.cloudProfile.bio,
-      joinDate: window.cloudProfile.joinDate,
+      displayName: prof.displayName || viewedUsername,
+      bio: prof.bio,
+      joinDate: prof.joinDate || Date.now(),
     };
   }
 
@@ -77,7 +79,7 @@ const Profile = (() => {
   }
 
   function getAvatar() {
-    return window.cloudProfile.avatar;
+    return isOwnProfile ? window.cloudProfile.avatar : (targetProfile?.avatar || null);
   }
   function saveAvatar(data) {
     window.cloudProfile.avatar = data;
@@ -89,7 +91,8 @@ const Profile = (() => {
   }
 
   function getHighlights() {
-    return window.cloudProfile.highlights || new Array(5).fill(null);
+    const prof = isOwnProfile ? window.cloudProfile : (targetProfile || {});
+    return prof.highlights || new Array(5).fill(null);
   }
   function saveHighlights(arr) {
     window.cloudProfile.highlights = arr;
@@ -98,7 +101,7 @@ const Profile = (() => {
 
   function getUserRatings() {
     // If viewing someone else, try to pull from their cloud profile
-    if (!isOwnProfile) return window.cloudProfile.ratings || {};
+    if (!isOwnProfile) return targetProfile?.ratings || {};
 
     const session = window.Auth.getSession();
     if (!session) return {};
@@ -108,8 +111,8 @@ const Profile = (() => {
   }
 
   function getWishlist() {
-    // Pull from the public cloud profile
-    const wl = window.cloudProfile.watchlist || {};
+    const prof = isOwnProfile ? window.cloudProfile : (targetProfile || {});
+    const wl = prof.watchlist || {};
     return Object.values(wl).sort(
       (a, b) => (b.addedAt || 0) - (a.addedAt || 0),
     );
@@ -216,13 +219,53 @@ const Profile = (() => {
       (document.getElementById("stat-posts").textContent =
         userForumPosts.length);
 
+    document.getElementById("stat-followers") &&
+      (document.getElementById("stat-followers").textContent = (
+        window.cloudProfile.followers || []
+      ).length);
+    document.getElementById("stat-following") &&
+      (document.getElementById("stat-following").textContent = (
+        window.cloudProfile.following || []
+      ).length);
+
     // 🟨 UI Updates for Read-Only Mode
     if (!isOwnProfile) {
       document.querySelector(".avatar-edit-overlay")?.remove();
       document.getElementById("btn-edit-profile")?.remove();
       document.getElementById("btn-friends")?.remove();
-      document.getElementById("profile-avatar-container").style.cursor =
+      document.getElementById("profile-avatar-container").style.cursor = 
         "default";
+
+        // Check auth to see if we can follow
+        const mySession = window.Auth.getSession();
+        if (mySession && typeof window.Friends !== "undefined") {
+           const btnFollow = document.getElementById("btn-interact-profile");
+           const btnText = document.getElementById("btn-interact-text");
+           if (btnFollow) {
+             btnFollow.style.display = "flex";
+             // Get my own user doc to see if I follow this person
+                                 getDoc(doc(db, "users", mySession.id.toString())).then((snap) => {
+                      if (snap.exists()) {
+                        const myData = snap.data();
+                        const iFollow = (myData.following || []).includes(viewedUsername);
+                        if (iFollow) {
+                          btnFollow.classList.add("following");
+                          btnText.textContent = "Unfollow";
+                        } else {
+                          btnFollow.classList.remove("following");
+                          btnText.textContent = "Follow";
+                        }
+                      }
+                    });
+             btnFollow.onclick = () => {
+                if (btnFollow.classList.contains("following")) {
+                   window.Friends.unfollow(viewedUsername).then(() => { btnFollow.classList.remove("following"); btnText.textContent = "Follow"; });
+                } else {
+                   window.Friends.follow(viewedUsername).then(() => { btnFollow.classList.add("following"); btnText.textContent = "Unfollow"; });
+                }
+             };
+           }
+        }
 
       const title = document.querySelector(".profile-card-title");
       if (title)
@@ -713,7 +756,8 @@ const Profile = (() => {
 
   async function fetchCloudData(session) {
     try {
-      if (isOwnProfile) {
+      if (session) {
+        // ALWAYS load the active user's own profile into window.cloudProfile for network actions!
         const userRef = doc(db, "users", session.id.toString());
         const snap = await getDoc(userRef);
         if (snap.exists()) {
@@ -724,18 +768,17 @@ const Profile = (() => {
           window.cloudProfile.joinDate = Date.now();
           await setDoc(userRef, window.cloudProfile);
         }
-      } else {
-        // Fetch public profile using username
+      }
+
+      if (!isOwnProfile) {
+        // Fetch public profile using username into targetProfile
         const q = query(
           collection(db, "users"),
           where("username", "==", viewedUsername),
         );
         const snap = await getDocs(q);
         if (!snap.empty) {
-          window.cloudProfile = {
-            ...window.cloudProfile,
-            ...snap.docs[0].data(),
-          };
+          targetProfile = snap.docs[0].data();
         } else {
           const main = document.getElementById("profile-main");
           if (main)
@@ -914,3 +957,9 @@ if (typeof window.API !== "undefined") {
 }
 
 document.addEventListener("DOMContentLoaded", window.Profile.init);
+
+
+
+
+
+

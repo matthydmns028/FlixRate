@@ -114,7 +114,10 @@
 .profile-bio-placeholder { color: var(--text-muted); font-style: italic; }
 
 .profile-header-actions { display: flex; gap: 10px; align-items: flex-end; padding-top: 56px; }
-.btn-edit-profile {
+.btn-interact-profile { padding: 10px 22px; border-radius: 50px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white;     font-size: 0.85rem; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: opacity 0.18s, transform 0.18s; box-shadow: 0 4px 16px rgba(124,58,237,0.3); }
+  .btn-interact-profile.following { background: rgba(255,255,255,0.06); box-shadow:none; border: 1px solid rgba(255,255,255,0.2) }
+  .btn-interact-profile:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-edit-profile {
   padding: 10px 22px; border-radius: 50px;
   background: linear-gradient(135deg, var(--accent), var(--accent-light));
   color: white; font-size: 0.85rem; font-weight: 700;
@@ -905,3 +908,5 @@
 @media (max-width: 640px) {
   .friends-drawer { width: 100%; }
 }
+
+

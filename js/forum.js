@@ -49,6 +49,7 @@ const Forum = (() => {
   };
 
   let cloudPosts = [];
+  let userAvatars = {};
 
   function getLikes() {
     return JSON.parse(localStorage.getItem(LIKES_KEY) || "{}");
@@ -86,6 +87,14 @@ const Forum = (() => {
       const q = query(collection(db, "forum_posts"), orderBy("ts", "desc"));
       const snap = await getDocs(q);
       cloudPosts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+        try {
+          const usersSnap = await getDocs(collection(db, "users"));
+          usersSnap.docs.forEach(d => {
+            const data = d.data();
+            if (data.username && data.avatar) userAvatars[data.username] = data.avatar;
+          });
+        } catch(err) { console.error("Failed to fetch user avatars", err); }
     } catch (e) {
       console.error("Failed to fetch forum posts:", e);
       showToast("Could not load posts. Please refresh.");
@@ -202,24 +211,20 @@ const Forum = (() => {
 
     // 🟨 THE ILLUSION: Inject live local avatar for the Post Author
     const isOwner = session?.username === post.author;
-    const authorAvatarHtml =
-      isOwner && myAvatar
-        ? `<img src="${myAvatar}" alt="${esc(post.author)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-        : avatarLetter(post.author);
-    const authorAvatarBg =
-      isOwner && myAvatar ? "transparent" : avatarColor(post.author);
+      const displayAvatar = isOwner && myAvatar ? myAvatar : userAvatars[post.author];
+      const authorAvatarHtml = displayAvatar ? `<img src="${displayAvatar}" alt="${esc(post.author)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarLetter(post.author);
+      const authorAvatarBg = displayAvatar ? "transparent" : avatarColor(post.author);
 
     const commentCount = post.comments?.length || 0;
 
     return `
       <div class="post-card" id="post-${post.id}">
         <div class="post-card-header">
-          <div class="post-avatar" style="background:${authorAvatarBg}; padding:0; overflow:hidden;"
-               title="${esc(post.author)}">
+          <div class="post-avatar" style="background:${authorAvatarBg}; padding:0; overflow:hidden;" title="${esc(post.author)}" onclick="window.location.href='profile.html?u=${encodeURIComponent(post.author)}'">
             ${authorAvatarHtml}
           </div>
           <div class="post-meta">
-            <div class="post-author">${esc(post.author)}</div>
+            <div class="post-author" style="cursor:pointer;" onclick="window.location.href='profile.html?u=${encodeURIComponent(post.author)}'" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(post.author)}</div>
             <div class="post-time-cat">
               <span>${timeAgo(post.ts)}</span>
               <span>·</span>
@@ -333,20 +338,17 @@ const Forum = (() => {
       .map((c) => {
         // 🟨 THE ILLUSION: Inject live local avatar for Comment Replies
         const isMe = session && c.author === session.username;
-        const cAvatarHtml =
-          isMe && myAvatar
-            ? `<img src="${myAvatar}" alt="${esc(c.author)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-            : avatarLetter(c.author);
-        const cAvatarBg =
-          isMe && myAvatar ? "transparent" : avatarColor(c.author);
+          const cDisplayAvatar = isMe && myAvatar ? myAvatar : userAvatars[c.author];
+          const cAvatarHtml = cDisplayAvatar ? `<img src="${cDisplayAvatar}" alt="${esc(c.author)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarLetter(c.author);
+          const cAvatarBg = cDisplayAvatar ? "transparent" : avatarColor(c.author);
 
         return `
       <div class="post-comment-item">
-        <div class="comment-mini-avatar" style="background:${cAvatarBg}; padding:0; overflow:hidden;">
+        <div class="comment-mini-avatar" style="background:${cAvatarBg}; padding:0; overflow:hidden; cursor:pointer;" onclick="window.location.href='profile.html?u=${encodeURIComponent(c.author)}'" title="${esc(c.author)}">
           ${cAvatarHtml}
         </div>
         <div class="comment-mini-bubble">
-          <div class="comment-mini-name">${esc(c.author)} <span style="font-weight:400;color:var(--text-muted);font-size:0.72rem;">${timeAgo(c.ts)}</span></div>
+          <div class="comment-mini-name"><span style="cursor:pointer;" onclick="window.location.href='profile.html?u=${encodeURIComponent(c.author)}'" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(c.author)}</span> <span style="font-weight:400;color:var(--text-muted);font-size:0.72rem;">${timeAgo(c.ts)}</span></div>
           <div class="comment-mini-text">${esc(c.text)}</div>
         </div>
       </div>`;
@@ -408,11 +410,9 @@ const Forum = (() => {
         .map((u) => {
           // 🟨 THE ILLUSION: Even update the active user avatars widget!
           const isMe = session && u === session.username;
-          const uAvatarHtml =
-            isMe && myAvatar
-              ? `<img src="${myAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-              : avatarLetter(u);
-          const uAvatarBg = isMe && myAvatar ? "transparent" : avatarColor(u);
+            const uDisplayAvatar = isMe && myAvatar ? myAvatar : userAvatars[u];
+            const uAvatarHtml = uDisplayAvatar ? `<img src="${uDisplayAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : avatarLetter(u);
+            const uAvatarBg = uDisplayAvatar ? "transparent" : avatarColor(u);
 
           return `
         <div class="online-avatar" style="background:${uAvatarBg}; padding:0; overflow:hidden;" title="${esc(u)}">
@@ -939,3 +939,13 @@ const Forum = (() => {
 // CRITICAL: Bind to window so HTML onClick attributes can access it!
 window.Forum = Forum;
 document.addEventListener("DOMContentLoaded", Forum.init);
+
+
+
+
+
+
+
+
+
+

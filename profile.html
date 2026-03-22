@@ -149,7 +149,11 @@
 
               <!-- Action buttons -->
               <div class="profile-header-actions">
-                <button class="btn-edit-profile" id="btn-edit-profile">
+                <div class="profile-connections" style="display:flex; gap:16px; align-items:center; margin-right:auto; font-size:14px; font-weight:600; color:var(--text-muted); margin-bottom:12px;">
+                    <span style="cursor:pointer; transition:color 0.2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'" onclick="if(window.Friends){window.Friends.open(); window.Friends.switchTab && window.Friends.switchTab('followers')}"><strong id="stat-followers" style="color:var(--text); font-size:15px; margin-right:4px;">0</strong> followers</span>
+                    <span style="cursor:pointer; transition:color 0.2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'" onclick="if(window.Friends){window.Friends.open(); window.Friends.switchTab && window.Friends.switchTab('following')}"><strong id="stat-following" style="color:var(--text); font-size:15px; margin-right:4px;">0</strong> following</span>
+                </div>
+                <button class="btn-edit-profile" id="btn-edit-profile" style="display:none;">
                   <svg
                     width="14"
                     height="14"
@@ -167,7 +171,7 @@
                   </svg>
                   Edit Profile
                 </button>
-                <button class="btn-friends" id="btn-friends" title="Friends">
+                <button class="btn-friends" id="btn-friends" title="Friends" style="display:none;">
                   <svg
                     width="15"
                     height="15"
@@ -189,7 +193,7 @@
                     >0</span
                   >
                 </button>
-                <button class="btn-share-profile" id="btn-share-profile">
+                <button class="btn-interact-profile" id="btn-interact-profile" style="display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="btn-interact-text">Follow</span></button> <button class="btn-share-profile" id="btn-share-profile">
                   <svg
                     width="14"
                     height="14"
@@ -215,27 +219,14 @@
                 <div class="stat-num" id="stat-ratings">0</div>
                 <div class="stat-label">Ratings</div>
               </div>
-              
-              <div class="stat-item" style="cursor:pointer; transition:opacity 0.2s" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="Go to Watchlist" onclick="window.location.href='watchlist.html'">
-                <div class="stat-num" id="stat-wishlist">0</div>
-                <div class="stat-label">Watchlist</div>
-              </div>
-              
-              <div class="stat-item" style="cursor:pointer; transition:opacity 0.2s" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="View Activity" onclick="window.Profile.switchTab('activity'); document.getElementById('panel-activity').scrollIntoView({behavior: 'smooth', block: 'center'})">
-                <div class="stat-num" id="stat-posts">0</div>
-                <div class="stat-label">Forum Posts</div>
-              </div>
-              
-              <div class="stat-item" style="cursor:pointer; transition:opacity 0.2s" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="View Highlights" onclick="document.getElementById('highlights-grid').scrollIntoView({behavior: 'smooth', block: 'center'})">
-                <div class="stat-num">5</div>
-                <div class="stat-label">Highlights</div>
-              </div>
-            </div>
 
-        <!-- ── BODY ─────────────────────────────────────────────── -->
-        <div class="profile-body">
-          <!-- ── LEFT COLUMN ───────────────────────────────────── -->
-          <div>
+                <div class="stat-item" style="cursor:pointer; transition:opacity 0.2s" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="Go to Watchlist" onclick="window.location.href='watchlist.html'">
+                  <div class="stat-num" id="stat-wishlist">0</div>
+                  <div class="stat-label">Watchlist</div>
+                </div>
+
+                <div class="stat-item" style="cursor:pointer; transition:opacity 0.2s" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="View Activity" onclick="window.Profile.switchTab('activity'); document.getElementById('panel-activity').scrollIntoView({behavior: 'smooth', block: 'center'})">
+                  <div class="stat-num" id="stat-posts">0</div><div class="stat-label">Posts</div></div></div><div>
             <!-- Highlights -->
             <div class="profile-card">
               <div class="profile-card-header">
@@ -282,6 +273,9 @@
                 <button class="profile-tab" data-tab="rated">
                   ⭐ My Ratings
                 </button>
+                <button class="profile-tab" data-tab="notifications">
+                  🔔 Notifications
+                </button>
               </div>
 
               <!-- Activity panel -->
@@ -293,6 +287,17 @@
               <div class="tab-panel" id="panel-rated" style="display: none">
                 <div id="tab-rated-grid"></div>
               </div>
+
+                <!-- Notifications panel -->
+                <div class="tab-panel" id="panel-notifications" style="display: none">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 0 4px;">
+                    <h3 style="margin:0; font-size:16px; color:var(--text-primary); font-weight:600;">Inbox</h3>
+                    <button class="mark-all-read" onclick="window.Notifications && window.Notifications.markAllAsRead()">Mark all as read</button>
+                  </div>
+                  <div id="profile-notif-list" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; min-height: 100px;">
+                    <div class="notification-empty">Loading...</div>
+                  </div>
+                </div>
             </div>
           </div>
           <!-- /left column -->
@@ -519,20 +524,14 @@
       </div>
 
       <!-- Tabs -->
-      <div class="friends-tabs">
-        <button class="friends-tab active" data-ftab="friends">
-          My Friends
-        </button>
-        <button class="friends-tab" data-ftab="requests">
-          Requests
-          <span
-            class="friends-tab-badge"
-            id="friends-tab-req-badge"
-            style="display: none"
-            >0</span
-          >
-        </button>
-        <button class="friends-tab" data-ftab="find">🔍 Find</button>
+        <div class="friends-tabs" style="display:flex; flex-wrap:wrap; gap:4px; padding-bottom:10px;">
+          <button class="friends-tab active" data-ftab="friends">My Friends</button>
+          <button class="friends-tab" data-ftab="requests">
+            Requests
+            <span class="friends-tab-badge" id="friends-tab-req-badge" style="display: none">0</span>
+          </button>
+          <button class="friends-tab" data-ftab="followers">Followers</button>
+          <button class="friends-tab" data-ftab="following">Following</button>
       </div>
 
       <!-- Search (only shown on Find tab) -->
@@ -564,3 +563,13 @@
 <script src="js/transitions.js"></script>
   </body>
 </html>
+
+
+
+
+
+
+
+
+
+
