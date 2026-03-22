@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="FlixRate Authentication Actions" />
+    <title>Authentication – FlixRate</title>
+    <link rel="icon" type="image/png" href="img/Logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/login.css" />
+    <script src="js/transitions.js"></script>
+    <style>
+      .message-box {
+        text-align: center;
+        display: none;
+      }
+      .message-box.active {
+        display: block;
+      }
+      .message-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+      .message-title {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+      }
+      .message-text {
+        color: var(--text-muted);
+        margin-bottom: 24px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body class="login-page">
+    <div class="login-wrapper" style="margin: auto">
+      <div class="login-logo">
+        <a href="index.html" aria-label="FlixRate Home">
+          <span>FLIX</span><span>RATE</span>
+        </a>
+      </div>
+
+      <div class="login-card" role="main" style="padding: 40px 32px">
+        <!-- LOADING STATE -->
+        <div id="state-loading" class="message-box active">
+          <div class="message-icon">⏳</div>
+          <h2 class="message-title">Verifying link...</h2>
+          <p class="message-text">
+            Please wait while we verify your request securely.
+          </p>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div id="state-error" class="message-box">
+          <div class="message-icon">⚠️</div>
+          <h2 class="message-title">Invalid Link</h2>
+          <p class="message-text" id="error-message">
+            This link may be expired, malformed, or has already been used.
+          </p>
+          <a
+            href="login.html"
+            class="form-submit"
+            style="
+              display: inline-block;
+              text-align: center;
+              text-decoration: none;
+            "
+            >Go to Sign In</a
+          >
+        </div>
+
+        <!-- RESET PASSWORD STATE -->
+        <div id="state-reset" class="message-box">
+          <h2 class="message-title">Reset Password</h2>
+          <p class="message-text" style="margin-bottom: 16px">
+            Enter your new secure password below.
+          </p>
+          <form
+            id="form-reset-password"
+            onsubmit="handleNewPasswordSubmit(event)"
+          >
+            <div class="form-group" style="text-align: left">
+              <label class="form-label" for="new-pw">New Password</label>
+              <div class="form-input-wrap">
+                <input
+                  type="password"
+                  id="new-pw"
+                  class="form-input"
+                  placeholder="Min. 6 characters"
+                  required
+                />
+              </div>
+              <span
+                class="form-error"
+                id="new-pw-err"
+                style="display: none; color: var(--danger)"
+              ></span>
+            </div>
+            <div class="form-group" style="text-align: left">
+              <label class="form-label" for="confirm-pw"
+                >Confirm Password</label
+              >
+              <div class="form-input-wrap">
+                <input
+                  type="password"
+                  id="confirm-pw"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <span
+                class="form-error"
+                id="confirm-pw-err"
+                style="display: none; color: var(--danger)"
+              ></span>
+            </div>
+            <button type="submit" class="form-submit" id="btn-save-pw">
+              Save Password
+            </button>
+          </form>
+        </div>
+
+        <!-- SUCCESS STATE -->
+        <div id="state-success" class="message-box">
+          <div class="message-icon">✅</div>
+          <h2 class="message-title">Success!</h2>
+          <p class="message-text" id="success-message">
+            Your password has been successfully updated.
+          </p>
+          <a
+            href="login.html"
+            class="form-submit"
+            style="
+              display: inline-block;
+              text-align: center;
+              text-decoration: none;
+            "
+            >Sign In Now</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- The actual Action script mapped strictly back to Firebase -->
+    <script type="module">
+      import { auth } from "./js/firebase-init.js";
+      import {
+        verifyPasswordResetCode,
+        confirmPasswordReset,
+        applyActionCode,
+      } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Parse the url
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get("mode"); // 'resetPassword', 'verifyEmail', etc
+        const oobCode = params.get("oobCode");
+
+        if (!mode || !oobCode) {
+          showState("state-error");
+          return;
+        }
+
+        if (mode === "resetPassword") {
+          try {
+            // Check if the link is still alive
+            await verifyPasswordResetCode(auth, oobCode);
+            showState("state-reset");
+          } catch (e) {
+            showState("state-error", e.message);
+          }
+        } else if (mode === "verifyEmail") {
+          try {
+            await applyActionCode(auth, oobCode);
+            showState("state-success", "Your email address is now verified!");
+          } catch (e) {
+            showState("state-error", e.message);
+          }
+        } else {
+          showState("state-error", "Unsupported request mode.");
+        }
+
+        window.oobCodeGlobal = oobCode; // Save for form injection
+      });
+
+      window.showState = function (id, overrideMsg) {
+        document
+          .querySelectorAll(".message-box")
+          .forEach((el) => el.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        if (overrideMsg) {
+          const mEl = document.querySelector("#" + id + " .message-text");
+          if (mEl) mEl.textContent = overrideMsg;
+        }
+      };
+
+      window.handleNewPasswordSubmit = async function (e) {
+        e.preventDefault();
+        const p1 = document.getElementById("new-pw").value;
+        const p2 = document.getElementById("confirm-pw").value;
+        const e1 = document.getElementById("new-pw-err");
+        const e2 = document.getElementById("confirm-pw-err");
+        const btn = document.getElementById("btn-save-pw");
+
+        e1.style.display = "none";
+        e2.style.display = "none";
+
+        if (p1.length < 6) {
+          e1.textContent = "Password must be at least 6 characters.";
+          e1.style.display = "block";
+          return;
+        }
+        if (p1 !== p2) {
+          e2.textContent = "Passwords do not match.";
+          e2.style.display = "block";
+          return;
+        }
+
+        btn.textContent = "Saving...";
+        btn.disabled = true;
+
+        try {
+          await confirmPasswordReset(auth, window.oobCodeGlobal, p1);
+          showState(
+            "state-success",
+            "Your password has been securely reset. You can now use it to log in.",
+          );
+        } catch (err) {
+          e1.textContent = err.message;
+          e1.style.display = "block";
+          btn.textContent = "Save Password";
+          btn.disabled = false;
+        }
+      };
+    </script>
+  </body>
+</html>

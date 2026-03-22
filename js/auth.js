@@ -23,59 +23,108 @@ const Auth = (() => {
     localStorage.setItem(SESSION_KEY, JSON.stringify(user));
   }
 
-  function register(username, email, password) {
-    const users = getUsers();
-    if (users.find((u) => u.email === email)) {
-      return { success: false, message: "Email already registered." };
+  async function register(username, email, password) {
+    try {
+      const { auth, db } = await import("./firebase-init.js");
+      const { createUserWithEmailAndPassword } =
+        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
+      const { doc, setDoc, query, collection, where, getDocs } =
+        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js");
+
+      const q = query(
+        collection(db, "users"),
+        where("username", "==", username),
+      );
+      const qs = await getDocs(q);
+      if (!qs.empty) {
+        return { success: false, message: "Username already taken." };
+      }
+
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+      const userObj = {
+        id: cred.user.uid,
+        username: username,
+        email: email,
+        avatar: null,
+        joinDate: Date.now(),
+      };
+
+      await setDoc(doc(db, "users", cred.user.uid), userObj, { merge: true });
+
+      saveSession({
+        id: cred.user.uid,
+        username: username,
+        email: email,
+        avatar: null,
+      });
+
+      return { success: true, user: userObj };
+    } catch (e) {
+      let msg = e.message;
+      if (
+        e.code === "auth/email-already-in-use" ||
+        e.code === "auth/email-already-exists"
+      )
+        msg = "Email already registered.";
+      if (e.code === "auth/weak-password")
+        msg = "Password should be at least 6 characters.";
+      return { success: false, message: msg };
     }
-    if (users.find((u) => u.username === username)) {
-      return { success: false, message: "Username already taken." };
-    }
-    const user = {
-      id: Date.now(),
-      username,
-      email,
-      password,
-      avatar: null,
-      createdAt: new Date().toISOString(),
-    };
-    users.push(user);
-    saveUsers(users);
-    saveSession({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      avatar: user.avatar,
-    });
-    return { success: true, user };
   }
 
-  function login(credential, password) {
-    const users = getUsers();
-    // Check if credential is an email (contains @) or a username
-    const isEmail = credential.includes("@");
-    let user;
+  async function login(credential, password) {
+    try {
+      const { auth, db } = await import("./firebase-init.js");
+      const { signInWithEmailAndPassword } =
+        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
+      const { doc, getDoc, query, collection, where, getDocs } =
+        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js");
 
-    if (isEmail) {
-      user = users.find(
-        (u) => u.email === credential && u.password === password,
-      );
-    } else {
-      user = users.find(
-        (u) => u.username === credential && u.password === password,
-      );
-    }
+      let loginEmail = credential;
+      const isEmail = credential.includes("@");
 
-    if (!user) {
+      if (!isEmail) {
+        const q = query(
+          collection(db, "users"),
+          where("username", "==", credential),
+        );
+        const qs = await getDocs(q);
+        if (qs.empty) {
+          return {
+            success: false,
+            message: "Invalid email/username or password.",
+          };
+        }
+        loginEmail = qs.docs[0].data().email;
+      }
+
+      const cred = await signInWithEmailAndPassword(auth, loginEmail, password);
+
+      const userRef = doc(db, "users", cred.user.uid);
+      const userSnap = await getDoc(userRef);
+      let userData = userSnap.exists() ? userSnap.data() : null;
+
+      if (!userData) {
+        userData = {
+          id: cred.user.uid,
+          username: credential,
+          email: loginEmail,
+          avatar: null,
+        };
+      }
+
+      saveSession({
+        id: cred.user.uid,
+        username: userData.username,
+        email: userData.email,
+        avatar: userData.avatar,
+      });
+
+      return { success: true, user: userData };
+    } catch (e) {
       return { success: false, message: "Invalid email/username or password." };
     }
-    saveSession({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      avatar: user.avatar,
-    });
-    return { success: true, user };
   }
 
   function logout() {
@@ -187,6 +236,59 @@ const Auth = (() => {
     }
   }
 
+  // Firebase Google Login
+  async function loginWithGoogle() {
+    try {
+      const { auth, db } = await import("./firebase-init.js");
+      const { signInWithPopup, GoogleAuthProvider } = await import(
+        "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js"
+      );
+      const { doc, getDoc, setDoc, serverTimestamp } = await import(
+        "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js"
+      );
+
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+
+      // Extract username from displayName or fallback to email prefix
+      let username = user.displayName
+        ? user.displayName.replace(/\s+/g, "")
+        : user.email.split("@")[0];
+
+      // Check if user already exists in Firestore. If not, add them.
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          username: username,
+          email: user.email,
+          createdAt: serverTimestamp(),
+          profileImage: user.photoURL || "img/ProfileBlank.png",
+          bio: ""
+        });
+      } else {
+        const data = userSnap.data();
+        if (data.username) username = data.username;
+      }
+
+      // Sync active session locally
+      saveSession({
+        username: username,
+        email: user.email,
+        uid: user.uid,
+        profileImage: user.photoURL || "img/ProfileBlank.png"
+      });
+      updateNavbar();
+
+      return { success: true };
+    } catch (error) {
+      console.error("Google Sign-in Error:", error);
+      return { success: false, message: error.message };
+    }
+  }
+
   // Firebase reset password
   async function resetPassword(email) {
     try {
@@ -194,7 +296,12 @@ const Auth = (() => {
         await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
       const { auth } = await import("./firebase-init.js");
 
-      await sendPasswordResetEmail(auth, email);
+      const actionCodeSettings = {
+        url: window.location.origin + "/auth-action.html",
+        handleCodeInApp: false,
+      };
+
+      await sendPasswordResetEmail(auth, email, actionCodeSettings);
       return {
         success: true,
         message: "Check your inbox! A secure reset link has been sent.",
@@ -211,6 +318,7 @@ const Auth = (() => {
   return {
     register,
     login,
+    loginWithGoogle,
     logout,
     resetPassword,
     confirmLogout,
