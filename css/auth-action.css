@@ -1,0 +1,54 @@
+.message-box {
+  text-align: center;
+  display: none;
+}
+.message-box.active {
+  display: block;
+}
+.message-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+.message-title {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+.message-text {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.action-wrapper {
+  margin: auto;
+}
+
+.action-card {
+  padding: 40px 32px;
+}
+
+.action-link-btn {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.action-form-text {
+  margin-bottom: 16px;
+}
+
+.action-form-group {
+  text-align: left;
+}
+
+.action-error-msg {
+  display: none;
+  color: var(--danger);
+}
+
+.action-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}

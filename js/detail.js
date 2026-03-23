@@ -1,5 +1,5 @@
 ﻿// ============================================================
-// FlixRate â€“ Detail Page Module (FIREBASE VERSION)
+// FlixRate – Detail Page Module (FIREBASE VERSION)
 // ============================================================
 
 import { auth, db } from "./firebase-init.js";
@@ -32,7 +32,7 @@ const Detail = (() => {
     return `${TYPE}_${ID}`;
   }
 
-  // â”€â”€ Local Like Storage (prevents spamming likes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Local Like Storage (prevents spamming likes) ────────────
   function getLikes() {
     return JSON.parse(localStorage.getItem(LIKES_KEY) || "{}");
   }
@@ -43,7 +43,7 @@ const Detail = (() => {
     return likes[commentId];
   }
 
-  // â”€â”€ Fetch data depending on type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Fetch data depending on type ──────────────────────────
   async function fetchItem() {
     if (TYPE === "anime") {
       const data = await API.fetchAnimeById(ID);
@@ -99,7 +99,7 @@ const Detail = (() => {
       language: d.original_language?.toUpperCase(),
       status: d.status,
       cast,
-      director: director?.name || "â€”",
+      director: director?.name || "—",
       trailerKey: trailer?.key || null,
       homepage: d.homepage || null,
     };
@@ -129,16 +129,16 @@ const Detail = (() => {
         (a.studios || [])
           .map((s) => s.name)
           .slice(0, 2)
-          .join(", ") || "â€”",
+          .join(", ") || "—",
       trailerKey: a.trailer?.youtube_id || null,
       homepage: a.url || null,
       episodes: a.episodes,
     };
   }
 
-  // â”€â”€ Render page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render page ────────────────────────────────────────────
   async function render(item) {
-    document.title = `${item.title} â€“ FlixRate`;
+    document.title = `${item.title} – FlixRate`;
 
     if (item.backdrop) {
       document.getElementById("detail-backdrop").style.backgroundImage =
@@ -154,10 +154,10 @@ const Detail = (() => {
     if (badgesEl) {
       const typeLabel =
         item.type === "anime"
-          ? "ðŸŽŒ Anime"
+          ? "🎌 Anime"
           : item.type === "tv"
-            ? "ðŸ“º Series"
-            : "ðŸŽ¬ Movie";
+            ? "📺 Series"
+            : "🎬 Movie";
       const genreBadges = item.genres
         .slice(0, 4)
         .map(
@@ -200,15 +200,15 @@ const Detail = (() => {
         [
           "Cast",
           item.cast
-            ? item.cast.slice(0, 80) + (item.cast.length > 80 ? "â€¦" : "")
-            : "â€”",
+            ? item.cast.slice(0, 80) + (item.cast.length > 80 ? "…" : "")
+            : "—",
         ],
-        ["Status", item.status || "â€”"],
-        ["Original Language", item.language || "â€”"],
+        ["Status", item.status || "—"],
+        ["Original Language", item.language || "—"],
         item.homepage
           ? [
               "Official Site",
-              `<a href="${item.homepage}" target="_blank" rel="noopener" style="color:var(--accent-light)">Visit â†—</a>`,
+              `<a href="${item.homepage}" target="_blank" rel="noopener" style="color:var(--accent-light)">Visit ↗</a>`,
             ]
           : null,
       ]
@@ -226,7 +226,7 @@ const Detail = (() => {
       if (trailerKey) {
         trailerBtn.onclick = () => loadTrailerEmbed(trailerKey);
       } else {
-        trailerBtn.textContent = "ðŸ” Search Trailer";
+        trailerBtn.textContent = "🔍 Search Trailer";
         trailerBtn.onclick = () =>
           window.open(
             `https://www.youtube.com/results?search_query=${encodeURIComponent(item.title + " trailer")}`,
@@ -280,7 +280,7 @@ const Detail = (() => {
     }
   }
 
-  // â”€â”€ Firestore Ratings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Firestore Ratings ────────────────────────────────────────────────
 
   async function renderGlobalRating() {
     const key = itemKey();
@@ -342,7 +342,7 @@ const Detail = (() => {
         });
         const thanks = document.getElementById("vote-thanks");
         if (thanks) {
-          thanks.textContent = `You rated this ${userStarSel}/5 â˜…`;
+          thanks.textContent = `You rated this ${userStarSel}/5 ★`;
           thanks.classList.add("visible");
         }
         const submitBtn = document.getElementById("vote-submit-btn");
@@ -378,7 +378,7 @@ const Detail = (() => {
     const full = Math.floor(normalizedRating);
     const half = normalizedRating - full >= 0.4 ? 1 : 0;
     const empty = 5 - full - half;
-    return "â˜…".repeat(full) + (half ? "â¯¨" : "") + "â˜†".repeat(empty);
+    return "★".repeat(full) + (half ? "☆" : "") + "☆".repeat(empty);
   }
 
   function formatNum(n) {
@@ -433,7 +433,7 @@ const Detail = (() => {
     if (userStarSel === prevVote) {
       const thanks = document.getElementById("vote-thanks");
       if (thanks) {
-        thanks.textContent = `You already rated this ${userStarSel}/5 â˜…`;
+        thanks.textContent = `You already rated this ${userStarSel}/5 ★`;
         thanks.classList.add("visible");
       }
       return;
@@ -479,7 +479,7 @@ const Detail = (() => {
 
       const thanks = document.getElementById("vote-thanks");
       if (thanks) {
-        thanks.textContent = `You rated this ${userStarSel}/5 â˜…`;
+        thanks.textContent = `You rated this ${userStarSel}/5 ★`;
         thanks.classList.add("visible");
       }
 
@@ -563,7 +563,7 @@ const Detail = (() => {
     }
   }
 
-  // â”€â”€ FIREBASE COMMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── FIREBASE COMMENTS ───────────────────────────────────────────────
   let commentsShown = 8;
   let commentFilter = "newest";
 
@@ -809,7 +809,7 @@ const Detail = (() => {
     textarea.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  // â”€â”€ Misc Video & UI Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Misc Video & UI Handlers ──────────────────────────────
   function loadTrailerEmbed(key) {
     key = key || trailerKey;
     if (!key) return;
@@ -876,7 +876,7 @@ const Detail = (() => {
 
         if (btn) {
           btn.classList.add("btn-ghost--active");
-          btn.querySelector("span").textContent = "In Watchlist âœ“";
+          btn.querySelector("span").textContent = "In Watchlist ✓";
         }
       }
     } catch (e) {
@@ -914,7 +914,7 @@ const Detail = (() => {
       </div>
       <div class="similar-anime-card-info">
         <div class="similar-anime-card-title">${anime.title_english || anime.title}</div>
-        <div class="similar-anime-card-rating">â˜… ${rating}</div>
+        <div class="similar-anime-card-rating">★ ${rating}</div>
       </div>`;
 
     const detailUrl = `detail.html?type=anime&id=${anime.mal_id}`;
@@ -977,7 +977,7 @@ const Detail = (() => {
     });
   }
 
-  // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Init ───────────────────────────────────────────────────
   async function init() {
     if (!ID) {
       document.getElementById("detail-error").style.display = "block";
@@ -991,7 +991,7 @@ const Detail = (() => {
     const btn = document.getElementById("btn-wishlist");
     if (btn && WL[itemKey()]) {
       btn.classList.add("btn-ghost--active");
-      btn.querySelector("span").textContent = "In Watchlist âœ“";
+      btn.querySelector("span").textContent = "In Watchlist ✓";
     }
 
     try {

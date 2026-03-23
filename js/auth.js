@@ -240,12 +240,10 @@ const Auth = (() => {
   async function loginWithGoogle() {
     try {
       const { auth, db } = await import("./firebase-init.js");
-      const { signInWithPopup, GoogleAuthProvider } = await import(
-        "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js"
-      );
-      const { doc, getDoc, setDoc, serverTimestamp } = await import(
-        "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js"
-      );
+      const { signInWithPopup, GoogleAuthProvider } =
+        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
+      const { doc, getDoc, setDoc, serverTimestamp } =
+        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js");
 
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
@@ -266,7 +264,7 @@ const Auth = (() => {
           email: user.email,
           createdAt: serverTimestamp(),
           profileImage: user.photoURL || "img/ProfileBlank.png",
-          bio: ""
+          bio: "",
         });
       } else {
         const data = userSnap.data();
@@ -278,7 +276,7 @@ const Auth = (() => {
         username: username,
         email: user.email,
         uid: user.uid,
-        profileImage: user.photoURL || "img/ProfileBlank.png"
+        profileImage: user.photoURL || "img/ProfileBlank.png",
       });
       updateNavbar();
 
