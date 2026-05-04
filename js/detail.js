@@ -623,11 +623,14 @@ const Detail = (() => {
       currentComments = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       try {
         const usersSnap = await getDocs(collection(db, "users"));
-        usersSnap.docs.forEach(d => {
+        usersSnap.docs.forEach((d) => {
           const data = d.data();
-          if (data.username && data.avatar) userAvatars[data.username] = data.avatar;
+          if (data.username && data.avatar)
+            userAvatars[data.username] = data.avatar;
         });
-      } catch (err) { console.error("Failed to fetch user avatars", err); }
+      } catch (err) {
+        console.error("Failed to fetch user avatars", err);
+      }
       renderComments();
     } catch (e) {
       console.error("Failed to load comments", e);
@@ -726,13 +729,19 @@ const Detail = (() => {
     list.innerHTML = visible
       .map((c) => {
         const hue = (c.userId || c.author.charCodeAt(0)) % 360;
-          const dateStr = timeAgo(c.ts);
-          const liked = likes[c.id] || false;
-          const starStr = c.rating ? "★".repeat(c.rating) + "☆".repeat(5 - c.rating) : "";
-          const userDisplayAvatar = userAvatars[c.author];
-          const avatarHtml = userDisplayAvatar ? `<img src="${userDisplayAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : c.author.charAt(0).toUpperCase();
-          const avatarBg = userDisplayAvatar ? "transparent" : `linear-gradient(135deg,hsl(${hue},70%,45%),hsl(${(hue + 60) % 360},70%,55%))`;
-          return `
+        const dateStr = timeAgo(c.ts);
+        const liked = likes[c.id] || false;
+        const starStr = c.rating
+          ? "★".repeat(c.rating) + "☆".repeat(5 - c.rating)
+          : "";
+        const userDisplayAvatar = userAvatars[c.author];
+        const avatarHtml = userDisplayAvatar
+          ? `<img src="${userDisplayAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+          : c.author.charAt(0).toUpperCase();
+        const avatarBg = userDisplayAvatar
+          ? "transparent"
+          : `linear-gradient(135deg,hsl(${hue},70%,45%),hsl(${(hue + 60) % 360},70%,55%))`;
+        return `
           <div class="comment-card" id="cc-${c.id}">
             <div class="comment-card-header">
               <div class="comment-card-avatar" style="background:${avatarBg}; cursor:pointer; padding:0; overflow:hidden;" onclick="window.location.href='profile.html?u=${encodeURIComponent(c.author)}'" title="${escHtml(c.author)}">
@@ -905,7 +914,7 @@ const Detail = (() => {
 
     card.innerHTML = `
       <div class="similar-anime-card-img-wrap">
-        <img src="${img}" alt="${anime.title_english || anime.title}" class="similar-anime-card-img" loading="lazy" onerror="this.src='img/placeholder.svg'">
+        <img src="${img}" alt="${anime.title_english || anime.title}" class="similar-anime-card-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='img/placeholder.svg'">
         <div class="similar-anime-card-overlay">
           <div class="similar-anime-card-play-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
@@ -1038,9 +1047,3 @@ const Detail = (() => {
 window.Detail = Detail;
 
 document.addEventListener("DOMContentLoaded", Detail.init);
-
-
-
-
-
-

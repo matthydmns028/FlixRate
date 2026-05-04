@@ -7,6 +7,13 @@ const Auth = (() => {
   const USERS_KEY = "flixrate_users";
   const SESSION_KEY = "flixrate_session";
 
+  // Pre-load Firebase modules to prevent popup blocker issues during login
+  const firebaseInitPromise = import("./firebase-init.js");
+  const firebaseAuthPromise =
+    import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
+  const firebaseFirestorePromise =
+    import("https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js");
+
   function getUsers() {
     return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
   }
@@ -25,11 +32,10 @@ const Auth = (() => {
 
   async function register(username, email, password) {
     try {
-      const { auth, db } = await import("./firebase-init.js");
-      const { createUserWithEmailAndPassword } =
-        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
+      const { auth, db } = await firebaseInitPromise;
+      const { createUserWithEmailAndPassword } = await firebaseAuthPromise;
       const { doc, setDoc, query, collection, where, getDocs } =
-        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js");
+        await firebaseFirestorePromise;
 
       const q = query(
         collection(db, "users"),
@@ -75,11 +81,10 @@ const Auth = (() => {
 
   async function login(credential, password) {
     try {
-      const { auth, db } = await import("./firebase-init.js");
-      const { signInWithEmailAndPassword } =
-        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
+      const { auth, db } = await firebaseInitPromise;
+      const { signInWithEmailAndPassword } = await firebaseAuthPromise;
       const { doc, getDoc, query, collection, where, getDocs } =
-        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js");
+        await firebaseFirestorePromise;
 
       let loginEmail = credential;
       const isEmail = credential.includes("@");
@@ -176,42 +181,49 @@ const Auth = (() => {
     const session = getSession();
     const navUser = document.getElementById("nav-user-area");
     if (!navUser) return;
-    if (session) {
-      const avatarData = localStorage.getItem("flixrate_profile_avatar");
-      navUser.innerHTML = `
-        <div class="nav-user-info">
-          <a href="profile.html" class="nav-user-link" title="View profile">
-            <div class="nav-avatar-wrap">
-              ${
-                avatarData
-                  ? `<img src="${avatarData}" alt="avatar" class="nav-avatar-img">`
-                  : `<div class="nav-avatar-placeholder">${session.username.charAt(0).toUpperCase()}</div>`
-              }
-            </div>
-            <div class="nav-user-text">
-              <span class="nav-username">${session.username}</span>
-              <span class="nav-uid">ID:${session.id.toString().slice(-8)}</span>
-            </div>
-          </a>
-          <button class="nav-logout-btn" onclick="event.stopPropagation();Auth.confirmLogout()" title="Logout">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          </button>
-        </div>`;
+    try {
+      if (session) {
+        const avatarData = localStorage.getItem("flixrate_profile_avatar");       
+        const safeId = session.id || session.uid || "UnknownID";
+        const safeUsername = session.username || "User";
+        navUser.innerHTML = `
+          <div class="nav-user-info">
+            <a href="profile.html" class="nav-user-link" title="View profile">    
+              <div class="nav-avatar-wrap">
+                ${
+                  avatarData
+                    ? `<img src="${avatarData}" alt="avatar" class="nav-avatar-img" referrerpolicy="no-referrer">`
+                    : `<div class="nav-avatar-placeholder">${safeUsername.charAt(0).toUpperCase()}</div>`
+                }
+              </div>
+              <div class="nav-user-text">
+                <span class="nav-username">${safeUsername}</span>
+                <span class="nav-uid">ID:${safeId.toString().slice(-8)}</span>
+              </div>
+            </a>
+            <button class="nav-logout-btn" onclick="event.stopPropagation();Auth.confirmLogout()" title="Logout">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+          </div>`;
 
-      // Initialize notifications
-      import("./notifications.js")
-        .then((mod) => {
-          if (mod.default) mod.default.init();
-        })
-        .catch((err) =>
-          console.error("Could not load notifications module:", err),
-        );
-    } else {
-      navUser.innerHTML = `
-        <a href="login.html" class="nav-login-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          Sign In
-        </a>`;
+        // Initialize notifications
+        import("./notifications.js")
+          .then((mod) => {
+            if (mod.default) mod.default.init();
+          })
+          .catch((err) =>
+            console.error("Could not load notifications module:", err),
+          );
+      } else {
+        navUser.innerHTML = `
+          <a href="login.html" class="nav-login-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Sign In
+          </a>`;
+      }
+    } catch (e) {
+      console.error("Navbar render error:", e);
+      navUser.innerHTML = `<button onclick="Auth.doLogout()" style="background:#e50914;color:#fff;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-weight:bold;">Emergency Logout</button>`;
     }
   }
 
@@ -239,11 +251,10 @@ const Auth = (() => {
   // Firebase Google Login
   async function loginWithGoogle() {
     try {
-      const { auth, db } = await import("./firebase-init.js");
-      const { signInWithPopup, GoogleAuthProvider } =
-        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
+      const { auth, db } = await firebaseInitPromise;
+      const { signInWithPopup, GoogleAuthProvider } = await firebaseAuthPromise;
       const { doc, getDoc, setDoc, serverTimestamp } =
-        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js");
+        await firebaseFirestorePromise;
 
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
@@ -275,6 +286,7 @@ const Auth = (() => {
       saveSession({
         username: username,
         email: user.email,
+        id: user.uid,
         uid: user.uid,
         profileImage: user.photoURL || "img/ProfileBlank.png",
       });
@@ -290,9 +302,8 @@ const Auth = (() => {
   // Firebase reset password
   async function resetPassword(email) {
     try {
-      const { sendPasswordResetEmail } =
-        await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js");
-      const { auth } = await import("./firebase-init.js");
+      const { sendPasswordResetEmail } = await firebaseAuthPromise;
+      const { auth } = await firebaseInitPromise;
 
       const actionCodeSettings = {
         url: window.location.origin + "/auth-action.html",

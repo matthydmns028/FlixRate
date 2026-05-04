@@ -26,7 +26,7 @@ const App = (() => {
     }
     card.innerHTML = `
       <div class="card-img-wrap">
-        <img src="${item.img}" alt="${item.title}" class="card-img" loading="lazy" onerror="this.src='img/placeholder.svg'">
+        <img src="${item.img}" alt="${item.title}" class="card-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='img/placeholder.svg'">
         <div class="card-overlay">
           <div class="card-rating">${localRatingStr ? "★ " + localRatingStr : ""}</div>
           <div class="card-type-badge">${item.type}</div>
@@ -203,7 +203,7 @@ const App = (() => {
               img,
               title: a.title_english || a.title,
               rating: a.score,
-              type: '🌸 Anime',
+              type: "🌸 Anime",
               sub: a.year || "",
               id: a.mal_id,
               itemType: "anime",
@@ -231,7 +231,7 @@ const App = (() => {
               img,
               title: a.title_english || a.title,
               rating: a.score,
-              type: '🌸 Anime',
+              type: "🌸 Anime",
               sub: a.season ? `${a.season} ${a.year}` : "",
               id: a.mal_id,
               itemType: "anime",
@@ -301,7 +301,7 @@ const App = (() => {
         items.push({
           img: CONFIG.TMDB_IMG_W300 + r.poster_path,
           title: r.title || r.name,
-          type: r.media_type === 'tv' ? '📺 Series' : '🎬 Movie',
+          type: r.media_type === "tv" ? "📺 Series" : "🎬 Movie",
           id: r.id,
           itemType: r.media_type === "tv" ? "tv" : "movie",
         });
@@ -314,7 +314,7 @@ const App = (() => {
         items.push({
           img,
           title: a.title_english || a.title,
-          type: '🌸 Anime',
+          type: "🌸 Anime",
           id: a.mal_id,
           itemType: "anime",
         });
@@ -335,7 +335,7 @@ const App = (() => {
         .map(
           (i) => `
       <div class="search-result-item" onclick="window.location.href='detail.html?type=${i.itemType}&id=${i.id}'" style="cursor:pointer">
-        <img src="${i.img}" alt="${i.title}" class="search-result-img">
+        <img src="${i.img}" alt="${i.title}" class="search-result-img" referrerpolicy="no-referrer">
         <div class="search-result-info">
           <span class="search-result-title">${i.title}</span>
           <span class="search-result-type">${i.type}</span>

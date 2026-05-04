@@ -161,7 +161,7 @@ const SearchPage = (() => {
                 <div class="src-poster-wrap">
                     <span class="src-type">${item.label}</span>
                     <span class="src-score">★ ${item.score}</span>
-                    ${item.img ? `<img src="${item.img}" class="src-poster" alt="${esc(item.title)}" loading="lazy">` : `<div class="src-poster-ph">🎬</div>`}
+                    ${item.img ? `<img src="${item.img}" class="src-poster" alt="${esc(item.title)}" loading="lazy" referrerpolicy="no-referrer">` : `<div class="src-poster-ph">🎬</div>`}
                 </div>
                 <div class="src-body">
                     <div class="src-title">${esc(item.title)}</div>

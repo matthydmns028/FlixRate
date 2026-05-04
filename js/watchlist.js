@@ -2,9 +2,11 @@
 // FlixRate – Watchlist Page Module (FIREBASE VERSION)
 // ============================================================
 
-import { auth, db } from './firebase-init.js';
-import { 
-  doc, getDoc, updateDoc
+import { auth, db } from "./firebase-init.js";
+import {
+  doc,
+  getDoc,
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const Watchlist = (() => {
@@ -13,14 +15,17 @@ const Watchlist = (() => {
   let cloudWatchlist = {}; // Store raw cloud object
 
   function esc(s) {
-    return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return (s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   // 🟨 Pull Watchlist directly from Firestore
   async function fetchCloudWatchlist() {
     const session = window.Auth.getSession();
     if (!session) return;
-    
+
     try {
       const userRef = doc(db, "users", String(session.id));
       const snap = await getDoc(userRef);
@@ -33,7 +38,9 @@ const Watchlist = (() => {
   }
 
   function getItems() {
-    return Object.values(cloudWatchlist).filter((v) => v && typeof v === "object");
+    return Object.values(cloudWatchlist).filter(
+      (v) => v && typeof v === "object",
+    );
   }
 
   function applyFilter(items) {
@@ -45,7 +52,8 @@ const Watchlist = (() => {
     return [...items].sort((a, b) => {
       if (sort === "newest") return (b.addedAt || 0) - (a.addedAt || 0);
       if (sort === "oldest") return (a.addedAt || 0) - (b.addedAt || 0);
-      if (sort === "rating") return (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0);
+      if (sort === "rating")
+        return (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0);
       if (sort === "title") return (a.title || "").localeCompare(b.title || "");
       return 0;
     });
@@ -80,7 +88,8 @@ const Watchlist = (() => {
     ["all", "movie", "tv", "anime"].forEach((f) => {
       const btn = document.querySelector(`.wl-filter-btn[data-filter="${f}"]`);
       if (!btn) return;
-      const c = f === "all" ? raw.length : raw.filter((i) => i.type === f).length;
+      const c =
+        f === "all" ? raw.length : raw.filter((i) => i.type === f).length;
       btn.querySelector(".wl-filter-count").textContent = c;
     });
 
@@ -95,15 +104,21 @@ const Watchlist = (() => {
       return;
     }
 
-    grid.innerHTML = items.map((item, idx) => {
+    grid.innerHTML = items
+      .map((item, idx) => {
         const key = `${item.type}_${item.id}`;
-        const typeLabel = item.type === "anime" ? "🎌 Anime" : item.type === "tv" ? "📺 TV" : "🎬 Movie";
+        const typeLabel =
+          item.type === "anime"
+            ? "🎌 Anime"
+            : item.type === "tv"
+              ? "📺 TV"
+              : "🎬 Movie";
         const delay = Math.min(idx * 0.04, 0.6);
-        
+
         let ratingStr = "";
-        if (typeof window.API !== 'undefined' && window.API.getLocalRating) {
-           const lr = window.API.getLocalRating(item.type, item.id);
-           ratingStr = lr.rating ? lr.rating.toFixed(1) : "";
+        if (typeof window.API !== "undefined" && window.API.getLocalRating) {
+          const lr = window.API.getLocalRating(item.type, item.id);
+          ratingStr = lr.rating ? lr.rating.toFixed(1) : "";
         }
 
         return `
@@ -116,7 +131,7 @@ const Watchlist = (() => {
              data-ctx-rating="${ratingStr || ""}"
              onclick="window.Watchlist.go('${esc(item.type)}','${item.id}')" style="animation-delay:${delay}s">
           <div class="wl-card-poster-wrap">
-            ${item.poster ? `<img src="${esc(item.poster)}" alt="${esc(item.title)}" class="wl-card-poster" loading="lazy">` : `<div class="wl-card-poster-placeholder">${item.type === "anime" ? "🎌" : item.type === "tv" ? "📺" : "🎬"}</div>`}
+            ${item.poster ? `<img src="${esc(item.poster)}" alt="${esc(item.title)}" class="wl-card-poster" loading="lazy" referrerpolicy="no-referrer">` : `<div class="wl-card-poster-placeholder">${item.type === "anime" ? "🎌" : item.type === "tv" ? "📺" : "🎬"}</div>`}
             ${ratingStr ? `<div class="wl-card-score">★ ${ratingStr}</div>` : ""}
             <div class="wl-card-type-badge">${typeLabel}</div>
             <button class="wl-card-remove" onclick="event.stopPropagation();window.Watchlist.remove('${key}')">✕ Remove</button>
@@ -126,7 +141,8 @@ const Watchlist = (() => {
             <div class="wl-card-meta">${item.year || ""}</div>
           </div>
         </div>`;
-      }).join("");
+      })
+      .join("");
   }
 
   function go(type, id) {
@@ -152,8 +168,9 @@ const Watchlist = (() => {
   }
 
   async function init() {
-    if (window.Auth && typeof window.Auth.init === 'function') window.Auth.init();
-    
+    if (window.Auth && typeof window.Auth.init === "function")
+      window.Auth.init();
+
     const session = window.Auth.getSession();
     if (!session) {
       showAuthGate();
@@ -167,7 +184,9 @@ const Watchlist = (() => {
     document.querySelectorAll(".wl-filter-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         filter = btn.dataset.filter;
-        document.querySelectorAll(".wl-filter-btn").forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll(".wl-filter-btn")
+          .forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         render();
       });

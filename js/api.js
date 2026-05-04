@@ -10,8 +10,8 @@ const API = (() => {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     const res = await fetch(url, {
       headers: {
-        'Authorization': `Bearer ${window.CONFIG.TMDB_BEARER}`,
-        'accept': 'application/json',
+        Authorization: `Bearer ${window.CONFIG.TMDB_BEARER}`,
+        accept: "application/json",
       },
     });
     if (!res.ok) throw new Error(`TMDB ${endpoint} failed: ${res.status}`);
@@ -118,7 +118,9 @@ const API = (() => {
           title: m.title || m.name,
           overview: m.overview,
           backdrop: window.CONFIG.TMDB_IMG_ORIGINAL + m.backdrop_path,
-          poster: m.poster_path ? window.CONFIG.TMDB_IMG_W500 + m.poster_path : null,
+          poster: m.poster_path
+            ? window.CONFIG.TMDB_IMG_W500 + m.poster_path
+            : null,
           rating: m.vote_average,
           votes: m.vote_count,
           year: (m.release_date || "").slice(0, 4),
@@ -164,79 +166,86 @@ const API = (() => {
   }
 
   // Inside your App module in app.js
-async function performSearch(query) {
-    const resultsEl = document.getElementById('search-results');
+  async function performSearch(query) {
+    const resultsEl = document.getElementById("search-results");
     if (!resultsEl) return;
 
     // 1. Show a loading indicator
     resultsEl.innerHTML = '<div class="search-status">Searching...</div>';
-    resultsEl.classList.add('search-results--open');
+    resultsEl.classList.add("search-results--open");
 
     try {
-        // 2. Fetch from both APIs simultaneously
-        const [tmdbResults, animeResults] = await Promise.all([
-            API.searchTMDB(query),
-            API.searchAnime(query)
-        ]);
+      // 2. Fetch from both APIs simultaneously
+      const [tmdbResults, animeResults] = await Promise.all([
+        API.searchTMDB(query),
+        API.searchAnime(query),
+      ]);
 
-        // 3. Combine and limit results
-        const items = [];
+      // 3. Combine and limit results
+      const items = [];
 
-        // Movies & TV (TMDB)
-        tmdbResults.slice(0, 4).forEach(m => {
-            if (!m.poster_path) return;
-            items.push({
-                id: m.id,
-                title: m.title || m.name,
-                type: m.media_type === 'tv' ? 'tv' : 'movie',
-                label: m.media_type === 'tv' ? '📺 TV' : '🎬 Movie',
-                img: window.CONFIG.TMDB_IMG_W300 + m.poster_path
-            });
+      // Movies & TV (TMDB)
+      tmdbResults.slice(0, 4).forEach((m) => {
+        if (!m.poster_path) return;
+        items.push({
+          id: m.id,
+          title: m.title || m.name,
+          type: m.media_type === "tv" ? "tv" : "movie",
+          label: m.media_type === "tv" ? "📺 TV" : "🎬 Movie",
+          img: window.CONFIG.TMDB_IMG_W300 + m.poster_path,
         });
+      });
 
-        // Anime (Jikan)
-        animeResults.slice(0, 4).forEach(a => {
-            items.push({
-                id: a.mal_id,
-                title: a.title_english || a.title,
-                type: 'anime',
-                label: '🎌 Anime',
-                img: a.images?.jpg?.image_url
-            });
+      // Anime (Jikan)
+      animeResults.slice(0, 4).forEach((a) => {
+        items.push({
+          id: a.mal_id,
+          title: a.title_english || a.title,
+          type: "anime",
+          label: "🎌 Anime",
+          img: a.images?.jpg?.image_url,
         });
+      });
 
-        if (items.length === 0) {
-            resultsEl.innerHTML = '<div class="search-status">No results found.</div>';
-            return;
-        }
+      if (items.length === 0) {
+        resultsEl.innerHTML =
+          '<div class="search-status">No results found.</div>';
+        return;
+      }
 
-        // 4. Render the results
-        const html = items.map(item => `
+      // 4. Render the results
+      const html = items
+        .map(
+          (item) => `
             <div class="search-result-item" onclick="window.location.href='detail.html?type=${item.type}&id=${item.id}'">
-                <img src="${item.img}" class="search-result-img" alt="${item.title}">
+                <img src="${item.img}" class="search-result-img" alt="${item.title}" referrerpolicy="no-referrer">
                 <div class="search-result-info">
                     <div class="search-result-title">${item.title}</div>
                     <div class="search-result-type">${item.label}</div>
                 </div>
             </div>
-        `).join('');
+        `,
+        )
+        .join("");
 
-        // 5. Add a "See All" link at the bottom
-        resultsEl.innerHTML = html + `
+      // 5. Add a "See All" link at the bottom
+      resultsEl.innerHTML =
+        html +
+        `
             <div class="search-see-all" onclick="window.location.href='search.html?q=${encodeURIComponent(query)}'">
                 See all results for "${query}" →
             </div>`;
-
     } catch (err) {
-        console.error("Search failed:", err);
-        resultsEl.innerHTML = '<div class="search-status error">Search failed. Try again.</div>';
+      console.error("Search failed:", err);
+      resultsEl.innerHTML =
+        '<div class="search-status error">Search failed. Try again.</div>';
     }
-} 
+  }
 
   // ── Local FlixRate Ratings ──────────────────────────────
   // Returns exclusively local rating data from localStorage
   function getLocalRating(type, id) {
-    const all = JSON.parse(localStorage.getItem('flixrate_ratings') || '{}');
+    const all = JSON.parse(localStorage.getItem("flixrate_ratings") || "{}");
     const key = `${type}_${id}`;
     const item = all[key];
     if (!item || !item.count) return { rating: 0, votes: 0 };
@@ -260,7 +269,7 @@ async function performSearch(query) {
     fetchHeroItems,
     getLocalRating,
     // Generic raw helpers (used by profile highlight picker)
-    tmdbRaw:  (endpoint, params = {}) => tmdb(endpoint, params),
+    tmdbRaw: (endpoint, params = {}) => tmdb(endpoint, params),
     jikanRaw: (endpoint) => jikan(endpoint),
   };
 })();
